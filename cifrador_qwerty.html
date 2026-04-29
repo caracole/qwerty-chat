@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QWERTY Cifrador / Descifrador</title>
+
+  <!--
+  ================================================================
+    FUENTES EXTERNAS (Google Fonts)
+    · Space Mono  → textos cifrados / monoespaciado de terminal
+    · DM Sans     → interfaz general, legible y moderna
+  ================================================================
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       VARIABLES CSS GLOBALES
+       Centraliza toda la paleta de colores y valores reutilizables.
+       Cambiar un valor aquí lo propaga a toda la página.
+       · --bg / --surface / --surface2 : capas de profundidad oscura
+       · --accent-*  : colores de acento por función
+           blue  = codificador
+           green = decodificador
+           amber = clave secreta
+           pink  = vocales acentuadas (línea 4)
+    ============================================================ */
+    :root {
+      --bg:#0f0f12;        /* fondo de página */
+      --surface:#1a1a22;   /* tarjetas */
+      --surface2:#22222e;  /* inputs y cajas secundarias */
+      --border:#2e2e3e;    /* bordes sutiles */
+      --accent-blue:#4a9eff;
+      --accent-green:#3ecf8e;
+      --accent-amber:#f5a623;
+      --accent-pink:#e06cff;
+      --text-main:#e8e8f0;
+      --text-muted:#6b6b80;
+      --radius:10px;
+      --mono:'Space Mono',monospace;
+      --sans:'DM Sans',sans-serif;
+    }
+
+    /* ============================================================
+       RESET MÍNIMO + BASE
+    ============================================================ */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text-main);min-height:100vh;padding:40px 20px 60px}
+
+    /* ============================================================
+       CABECERA
+       · h1 bicolor: azul=cifra, verde=descifra
+       · badges: indicadores visuales de funcionalidades activas
+    ============================================================ */
+    header{text-align:center;margin-bottom:32px}
+    header h1{font-family:var(--mono);font-size:clamp(22px,4vw,36px);letter-spacing:3px}
+    header h1 span.blue{color:var(--accent-blue)}
+    header h1 span.green{color:var(--accent-green)}
+    header p{margin-top:8px;color:var(--text-muted);font-size:14px;letter-spacing:1px}
+    .badge-row{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .badge{display:inline-block;font-size:10px;font-family:var(--mono);letter-spacing:1px;padding:2px 10px;border-radius:20px}
+    .badge-pink{background:#2a1a35;border:1px solid var(--accent-pink);color:var(--accent-pink)}
+    .badge-amber{background:#2a2010;border:1px solid var(--accent-amber);color:var(--accent-amber)}
+
+    /* ============================================================
+       BARRA DE CLAVE DEL CODIFICADOR
+       Panel ámbar situado encima de las dos columnas.
+       Contiene: input password + botón ojo + contador + indicador fuerza.
+    ============================================================ */
+    .key-bar{max-width:960px;margin:0 auto 24px;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent-amber);border-radius:var(--radius);padding:18px 24px}
+    .key-bar-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-amber);margin-bottom:12px}
+    .key-bar-inner{display:flex;align-items:center;gap:10px}
+    /* Wrapper relativo para poder posicionar el botón ojo encima del input */
+    .key-input-wrap{position:relative;flex:1}
+    .key-input-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-main);font-family:var(--mono);font-size:14px;padding:10px 44px 10px 14px;outline:none;transition:border-color .2s;letter-spacing:2px}
+    .key-input-wrap input:focus{border-color:var(--accent-amber)}
+    /* Botón ojo: posición absoluta sobre el borde derecho del input */
+    .eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;transition:color .15s}
+    .eye-btn:hover{color:var(--text-main);background:none}
+    .key-hint{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap}
+
+    /* Indicador de fuerza de clave: 4 barras de color
+       rojo=débil → ámbar=regular → azul=buena → verde=fuerte */
+    .key-strength{display:flex;gap:4px;align-items:center;margin-top:8px}
+    .strength-bar{height:3px;width:36px;border-radius:2px;background:var(--border);transition:background .3s}
+    .strength-label{font-size:10px;font-family:var(--mono);color:var(--text-muted);margin-left:6px}
+
+    /* ============================================================
+       LAYOUT PRINCIPAL
+       Grid de 2 columnas en escritorio, 1 columna en móvil (<680px).
+    ============================================================ */
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:960px;margin:0 auto}
+    @media(max-width:680px){.layout{grid-template-columns:1fr}}
+
+    /* ============================================================
+       TARJETAS (CARD)
+       Contenedor de cada sección (codificador / decodificador).
+       La franja de color en border-top distingue visualmente cada función.
+    ============================================================ */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:16px}
+    .card.encode{border-top:3px solid var(--accent-blue)}
+    .card.decode{border-top:3px solid var(--accent-green)}
+    .card-title{font-family:var(--mono);font-size:13px;letter-spacing:2px;text-transform:uppercase}
+    .card.encode .card-title{color:var(--accent-blue)}
+    .card.decode .card-title{color:var(--accent-green)}
+
+    /* Etiquetas de campo */
+    label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+
+    /* ============================================================
+       ÁREAS DE TEXTO Y CAJAS DE RESULTADO
+       · textarea   : editable, fuente sans
+       · .output-box: solo lectura, fuente mono para el código cifrado
+       · .locked    : aspecto ámbar cuando hay clave activa (salida XOR hex)
+       · .garbage   : aspecto rojo cuando la clave es incorrecta
+    ============================================================ */
+    textarea,.output-box{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-main);font-size:15px;padding:12px;resize:vertical;outline:none;transition:border-color .2s}
+    textarea{font-family:var(--sans);min-height:90px}
+    textarea:focus{border-color:var(--accent-blue)}
+    .output-box{font-family:var(--mono);font-size:13px;min-height:90px;word-break:break-all;line-height:1.8;cursor:default;white-space:pre-wrap}
+    .output-box.locked{color:var(--accent-amber);border-color:#3a3010;background:#1a1808;letter-spacing:1px}
+    .output-box.garbage{color:#c05050;border-color:#3a1010;background:#150a0a;opacity:.85}
+
+    /* ============================================================
+       FILA DE SALIDA (CODIFICADOR)
+       Agrupa la etiqueta "Código resultante" y el botón Copiar
+       en una fila flex con espacio entre ellos.
+    ============================================================ */
+    .output-row{display:flex;flex-direction:column;gap:6px}
+    .output-header{display:flex;align-items:center;justify-content:space-between}
+
+    /* Botón copiar: pequeño, discreto; verde al confirmarse */
+    .btn-copy{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s;display:flex;align-items:center;gap:5px;letter-spacing:.5px}
+    .btn-copy:hover{background:var(--border);color:var(--text-main)}
+    .btn-copy.copied{background:#0f2a1a;border-color:var(--accent-green);color:var(--accent-green)}
+
+    /* ============================================================
+       BLOQUE DE CLAVE DEL DECODIFICADOR (inline)
+       Panel ámbar integrado dentro de la tarjeta decode.
+       Contiene: label + input password + ojo + estado + botón Descifrar.
+       DISEÑO CLAVE: el botón Descifrar es EXPLÍCITO — el decode NO se
+       dispara en tiempo real mientras el usuario teclea la clave, para
+       evitar resultados incorrectos con claves parciales.
+    ============================================================ */
+    .inline-key-wrap{background:#111118;border:1px solid var(--border);border-left:3px solid var(--accent-amber);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+    .inline-key-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-amber)}
+    .inline-key-row{display:flex;align-items:center;gap:8px}
+    .inline-key-input-wrap{position:relative;flex:1}
+    .inline-key-input-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-main);font-family:var(--mono);font-size:13px;padding:9px 40px 9px 12px;outline:none;transition:border-color .2s,background .2s;letter-spacing:1px}
+    .inline-key-input-wrap input:focus{border-color:var(--accent-amber)}
+    /* Botón ojo pequeño para el campo de clave del decodificador */
+    .eye-btn-sm{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:3px;transition:color .15s}
+    .eye-btn-sm:hover{color:var(--text-main);background:none}
+    /* Estado de la clave: "↵ pulsa Descifrar" / "✓ correcta" / "✗ incorrecta" */
+    .key-status{font-size:11px;font-family:var(--mono);color:var(--text-muted);white-space:nowrap}
+    .key-status.ok{color:var(--accent-green)}
+    .key-status.waiting{color:var(--accent-amber)}
+
+    /* Botón principal de descifrado — ocupa el ancho completo del bloque */
+    .btn-decode{width:100%;font-family:var(--mono);font-size:13px;letter-spacing:1px;font-weight:700;padding:11px 0;border-radius:8px;border:1px solid var(--accent-green);background:linear-gradient(135deg,#0f2a1a,#0a1f14);color:var(--accent-green);cursor:pointer;transition:background .2s,box-shadow .2s}
+    .btn-decode:hover{background:linear-gradient(135deg,#1a4a2a,#0f2a1a);box-shadow:0 0 12px #3ecf8e33}
+
+    /* ============================================================
+       BOTONES GENÉRICOS Y PRIMARIOS
+    ============================================================ */
+    .btn-row{display:flex;gap:8px;flex-wrap:wrap}
+    button{font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-main);cursor:pointer;transition:background .15s,border-color .15s}
+    button:hover{background:var(--border)}
+    .btn-primary-blue{background:var(--accent-blue);border-color:var(--accent-blue);color:#000}
+    .btn-primary-blue:hover{background:#74b8ff;border-color:#74b8ff}
+
+    /* Tag de modo (sin clave / con clave) junto al título de la tarjeta */
+    .mode-tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
+    .mode-tag.on{background:#2a2010;border:1px solid var(--accent-amber);color:var(--accent-amber)}
+    .mode-tag.off{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
+
+    /* ============================================================
+       FICHAS DE DETALLE DE PARES (pair-chip)
+       Muestran cada token del código: [ref][pos] → [destino]
+       · .ref  azul  = letra de referencia (indica la línea)
+       · .pos  ámbar = número de posición (1-based)
+       · .dest verde = letra resultante
+       · .accented   = variante rosa para la línea 4 (acentuadas)
+    ============================================================ */
+    .pairs{display:flex;flex-wrap:wrap;gap:5px;min-height:28px}
+    .pair-chip{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)}
+    .pair-chip .ref{color:var(--accent-blue)}
+    .pair-chip .pos{color:var(--accent-amber)}
+    .pair-chip .arr{color:var(--text-muted);margin:0 3px}
+    .pair-chip .dest{color:var(--accent-green)}
+    .pair-chip.accented .ref{color:var(--accent-pink)}
+    .pair-chip.accented .dest{color:var(--accent-pink)}
+
+    /* ============================================================
+       TECLADO VISUAL
+       Muestra las 5 filas del teclado con resaltado de teclas activas.
+       · .hl-src  azul  = tecla de referencia usada como prefijo
+       · .hl-dst  verde = tecla destino (letra real)
+       · .hl-both ámbar = cuando referencia y destino coinciden
+       · .hl-acc  rosa  = cualquier tecla de la línea 4 (acentuadas)
+       · .accented-key  = teclas de la línea 4, ligeramente más pequeñas
+       · .accent-row    = separador visual (línea discontinua) antes de la fila 4
+    ============================================================ */
+    .keyboard-section{max-width:960px;margin:24px auto 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+    .keyboard-section h2{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .kb-row{display:flex;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:2px}
+    .kb-label{font-family:var(--mono);font-size:10px;color:var(--text-muted);width:80px;flex-shrink:0}
+    .key{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-muted);transition:background .15s,color .15s}
+    .key.accented-key{font-size:11px;width:30px;height:30px}
+    .key.hl-src{background:#1a3a5c;border-color:var(--accent-blue);color:var(--accent-blue)}
+    .key.hl-dst{background:#0f3326;border-color:var(--accent-green);color:var(--accent-green)}
+    .key.hl-both{background:#2a2a10;border-color:var(--accent-amber);color:var(--accent-amber)}
+    .key.hl-acc{background:#2a1a35;border-color:var(--accent-pink);color:var(--accent-pink)}
+    .kb-row.accent-row{border-top:1px dashed var(--border);padding-top:8px;margin-top:4px}
+    .kb-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+    .kb-legend span{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+    .dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+    /* Caja de info XOR: muestra el código QWERTY intermedio antes/después del XOR */
+    .xor-info{font-size:11px;font-family:var(--mono);color:var(--text-muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:none}
+    .xor-info.visible{display:block}
+    .xor-info span{color:var(--accent-amber)}
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     CABECERA
+================================================================ -->
+<header>
+  <h1><span class="blue">CIFRA</span> · <span class="green">DESCIFRA</span></h1>
+  <p>Codificador / Decodificador basado en líneas del teclado QWERTY español</p>
+  <div class="badge-row">
+    <span class="badge badge-pink">✦ vocales acentuadas europeas</span>
+    <span class="badge badge-amber">🔑 clave secreta XOR</span>
+  </div>
+</header>
+
+<!-- ================================================================
+     BARRA DE CLAVE DEL CODIFICADOR
+     Panel superior compartido: la clave introducida aquí se aplica
+     SOLO al codificador. El decodificador tiene su propio campo.
+================================================================ -->
+<div class="key-bar">
+  <div class="key-bar-title">🔑 Clave Secreta — Codificador</div>
+  <div class="key-bar-inner">
+    <div class="key-input-wrap">
+      <input type="password" id="enc-secret-key"
+             placeholder="Clave para cifrar… (vacía = sin encriptación extra)"
+             oninput="onEncKeyChange()" />
+      <!-- Alterna type="password" / type="text" para mostrar/ocultar -->
+      <button class="eye-btn" onclick="toggleEye('enc-secret-key')">👁</button>
+    </div>
+    <div class="key-hint" id="enc-key-hint">sin clave</div>
+  </div>
+  <!-- Indicador de fuerza: oculto hasta que se escriba algo -->
+  <div class="key-strength" id="key-strength" style="display:none">
+    <div class="strength-bar" id="sb1"></div>
+    <div class="strength-bar" id="sb2"></div>
+    <div class="strength-bar" id="sb3"></div>
+    <div class="strength-bar" id="sb4"></div>
+    <span class="strength-label" id="strength-label"></span>
+  </div>
+</div>
+
+<!-- ================================================================
+     LAYOUT PRINCIPAL: CODIFICADOR (izq.) + DECODIFICADOR (der.)
+================================================================ -->
+<div class="layout">
+
+  <!-- ============================================================
+       TARJETA CODIFICADOR
+       Flujo: texto → cifrado QWERTY (capa 1) → XOR hex (capa 2 si hay clave)
+  ============================================================ -->
+  <div class="card encode">
+    <div class="card-title">⬡ Codificador
+      <!-- Tag que indica si la clave XOR está activa -->
+      <span class="mode-tag off" id="enc-mode-tag">sin clave</span>
+    </div>
+
+    <div>
+      <label for="enc-input">Texto original</label>
+      <!-- oninput: re-codifica en tiempo real con cada pulsación -->
+      <textarea id="enc-input" placeholder="Escribe el texto a cifrar…" oninput="onEncodeInput()"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <!-- "Recodificar": genera nuevas letras de referencia aleatorias
+           para el mismo texto (el código cambia pero sigue siendo válido) -->
+      <button class="btn-primary-blue" onclick="encode()">↺ Recodificar</button>
+      <button onclick="clearEncode()">Limpiar</button>
+    </div>
+
+    <!-- Salida con botón Copiar -->
+    <div class="output-row">
+      <div class="output-header">
+        <label style="margin:0">Código resultante</label>
+        <button class="btn-copy" id="btn-copy" onclick="copyCode()">⎘ Copiar</button>
+      </div>
+      <!-- Clase "locked" (ámbar) cuando el resultado es hex XOR -->
+      <div class="output-box" id="enc-output"></div>
+    </div>
+
+    <!-- Muestra el código QWERTY de capa 1 antes de aplicar XOR
+         Solo visible cuando hay clave activa -->
+    <div class="xor-info" id="enc-xor-info">Capa 1 QWERTY: <span id="enc-qwerty-preview"></span></div>
+
+    <!-- Fichas de detalle: un chip por cada letra codificada -->
+    <div>
+      <label>Detalle de pares (capa QWERTY)</label>
+      <div class="pairs" id="enc-pairs"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TARJETA DECODIFICADOR
+       Flujo inverso: hex → XOR inverso (si hay clave) → descifrado QWERTY → texto
+       IMPORTANTE: el decode NO se dispara en tiempo real mientras se
+       teclea la clave — requiere pulsar el botón o Enter para evitar
+       resultados parciales incorrectos.
+  ============================================================ -->
+  <div class="card decode">
+    <div class="card-title">⬡ Decodificador
+      <span class="mode-tag off" id="dec-mode-tag">sin clave</span>
+    </div>
+
+    <div>
+      <label for="dec-input">Código cifrado</label>
+      <!-- oninput: sin clave → decode tiempo real; con clave → pide pulsar botón -->
+      <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
+    </div>
+
+    <!-- Bloque de clave propio del decodificador
+         Independiente del codificador — el receptor introduce SU clave aquí -->
+    <div class="inline-key-wrap">
+      <div class="inline-key-label">🔑 Clave secreta</div>
+      <div class="inline-key-row">
+        <div class="inline-key-input-wrap">
+          <input type="password" id="dec-secret-key"
+                 placeholder="Introduce la clave para descifrar…"
+                 oninput="onDecKeyChange()"
+                 onkeydown="if(event.key==='Enter') decode()" />
+          <!-- Enter también dispara decode() como alternativa al botón -->
+          <button class="eye-btn-sm" onclick="toggleEye('dec-secret-key')">👁</button>
+        </div>
+        <!-- Estado: "↵ pulsa Descifrar" / "✓ clave correcta" / "✗ incorrecta" -->
+        <div class="key-status waiting" id="dec-key-status">sin clave</div>
+      </div>
+      <!-- Botón explícito: único punto de disparo del descifrado con clave -->
+      <button class="btn-decode" onclick="decode()">⬡ Descifrar</button>
+    </div>
+
+    <!-- Resultado descifrado: clase "garbage" (rojo) si la clave es incorrecta -->
+    <div>
+      <label>Texto descifrado</label>
+      <div class="output-box" id="dec-output"></div>
+    </div>
+
+    <!-- Muestra el código QWERTY intermedio tras revertir el XOR
+         Solo visible cuando la clave es correcta -->
+    <div class="xor-info" id="dec-xor-info">Tras XOR inverso: <span id="dec-qwerty-preview"></span></div>
+
+    <div>
+      <label>Detalle de pares (capa QWERTY)</label>
+      <div class="pairs" id="dec-pairs"></div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- ================================================================
+     TECLADO VISUAL
+     5 filas generadas dinámicamente por renderKeyboard().
+     Resalta en tiempo real las teclas usadas en la última operación.
+================================================================ -->
+<div class="keyboard-section">
+  <h2>Teclado QWERTY Español — referencia visual</h2>
+  <div id="kb-row0" class="kb-row"></div><!-- Línea 0: cifras 1-0 -->
+  <div id="kb-row1" class="kb-row"></div><!-- Línea 1: Q W E R T Y U I O P -->
+  <div id="kb-row2" class="kb-row"></div><!-- Línea 2: A S D F G H J K L Ñ -->
+  <div id="kb-row3" class="kb-row"></div><!-- Línea 3: Z X C V B N M -->
+  <div id="kb-row4" class="kb-row accent-row"></div><!-- Línea 4: vocales acentuadas -->
+  <div class="kb-legend">
+    <span><span class="dot" style="background:#1a3a5c;border:1px solid #4a9eff"></span> Letra de referencia</span>
+    <span><span class="dot" style="background:#0f3326;border:1px solid #3ecf8e"></span> Letra destino</span>
+    <span><span class="dot" style="background:#2a2a10;border:1px solid #f5a623"></span> Coinciden</span>
+    <span><span class="dot" style="background:#2a1a35;border:1px solid #e06cff"></span> Vocal acentuada</span>
+  </div>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT — TODA LA LÓGICA
+================================================================ -->
+<script>
+
+  /* ==============================================================
+     DATOS: LÍNEAS DEL TECLADO QWERTY ESPAÑOL
+     Índice 0 → cifras (no usadas como referencia, solo display)
+     Índice 1 → Q W E R T Y U I O P
+     Índice 2 → A S D F G H J K L Ñ
+     Índice 3 → Z X C V B N M
+     Índice 4 → Vocales acentuadas europeas (línea extra)
+     La posición en el array es la clave: pos = colIdx + 1 (base 1)
+  ============================================================== */
+  const LINEAS = [
+    ['1','2','3','4','5','6','7','8','9','0'],
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L','Ñ'],
+    ['Z','X','C','V','B','N','M'],
+    ['Á','É','Í','Ó','Ú','Ü','À','È','Ì','Ò','Ù','Ï']
+  ];
+
+  /* Etiquetas para el teclado visual */
+  const LABELS = [
+    'Línea 0 — Cifras','Línea 1 — QWERTY',
+    'Línea 2 — ASDFG','Línea 3 — ZXCVB','Línea 4 — Acentuadas ✦'
+  ];
+
+  /* ==============================================================
+     MAPA DE NORMALIZACIÓN DE ACENTUADAS
+     Convierte cualquier vocal acentuada (min o may) a su forma
+     canónica MAYÚSCULA tal como aparece en LINEAS[4].
+     Permite que el usuario escriba "café" y se detecte la 'é'.
+  ============================================================== */
+  const ACCENT_NORMALIZE = {
+    'á':'Á','Á':'Á','é':'É','É':'É','í':'Í','Í':'Í','ó':'Ó','Ó':'Ó',
+    'ú':'Ú','Ú':'Ú','ü':'Ü','Ü':'Ü','à':'À','À':'À','è':'È','È':'È',
+    'ì':'Ì','Ì':'Ì','ò':'Ò','Ò':'Ò','ù':'Ù','Ù':'Ù','ï':'Ï','Ï':'Ï'
+  };
+
+  /* ==============================================================
+     buscarLetra(ch)
+     Busca un carácter en las líneas 1-4 (no en la de cifras).
+     Normaliza acentuadas antes de buscar.
+     Devuelve { lineaIdx, colIdx } o null si no existe.
+  ============================================================== */
+  function buscarLetra(ch) {
+    const norm = ACCENT_NORMALIZE[ch] || ch.toUpperCase();
+    for (let r = 1; r < LINEAS.length; r++) {
+      const idx = LINEAS[r].indexOf(norm);
+      if (idx !== -1) return { lineaIdx: r, colIdx: idx };
+    }
+    return null;
+  }
+
+  /* Entero aleatorio entre 0 y max-1 */
+  function randInt(max) { return Math.floor(Math.random() * max); }
+
+  /* ==============================================================
+     CAPA 2: CIFRADO / DESCIFRADO XOR
+     El XOR es su propio inverso: la misma función cifra y descifra.
+     Proceso de cifrado:
+       1. Texto → bytes UTF-8 (TextEncoder)
+       2. Cada byte XOR con el byte correspondiente de la clave (cíclico)
+       3. Resultado → string hexadecimal (2 dígitos por byte)
+     Proceso de descifrado:
+       1. Hex → bytes
+       2. Cada byte XOR con la clave (mismo proceso, XOR es simétrico)
+       3. Bytes → texto UTF-8 (TextDecoder con modo fatal:true)
+          Si el resultado no es UTF-8 válido → la clave es incorrecta
+          → se genera texto "basura visible" en su lugar
+  ============================================================== */
+
+  /* Cifra el texto QWERTY con la clave → devuelve string hex */
+  function xorEncrypt(text, key) {
+    if (!key) return text; // sin clave → devolver tal cual
+    const tb = new TextEncoder().encode(text);
+    const kb = new TextEncoder().encode(key);
+    const r  = new Uint8Array(tb.length);
+    for (let i = 0; i < tb.length; i++) r[i] = tb[i] ^ kb[i % kb.length];
+    return Array.from(r).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  /* Descifra el hex con la clave → { text, ok }
+     ok=true  → descifrado correcto (UTF-8 válido)
+     ok=false → clave incorrecta o formato inválido → texto basura */
+  function xorDecrypt(hex, key) {
+    if (!key) return { text: hex, ok: true };
+
+    // Verificación de formato: el hex cifrado solo puede contener 0-9 a-f
+    // y debe tener longitud par (2 hex = 1 byte)
+    if (!/^[0-9a-fA-F]+$/.test(hex) || hex.length % 2 !== 0) {
+      // El input no es hex → probablemente se pegó código sin clave
+      // o con clave incorrecta → producir basura visible
+      const raw = new TextEncoder().encode(hex);
+      const kb  = new TextEncoder().encode(key);
+      const r   = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) r[i] = raw[i] ^ kb[i % kb.length];
+      return { text: garbageReadable(r), ok: false };
+    }
+
+    // Convertir hex → bytes y aplicar XOR con la clave
+    const eb = Uint8Array.from(hex.match(/.{1,2}/g).map(b => parseInt(b,16)));
+    const kb = new TextEncoder().encode(key);
+    const r  = new Uint8Array(eb.length);
+    for (let i = 0; i < eb.length; i++) r[i] = eb[i] ^ kb[i % kb.length];
+
+    // Decodificar en modo estricto: {fatal:true} lanza error si los bytes
+    // no forman secuencias UTF-8 válidas → indica clave incorrecta
+    try {
+      const decoded = new TextDecoder('utf-8', { fatal: true }).decode(r);
+      return { text: decoded, ok: true };
+    } catch(e) {
+      return { text: garbageReadable(r), ok: false };
+    }
+  }
+
+  /* Convierte bytes arbitrarios en caracteres ASCII imprimibles.
+     Garantiza que el "texto basura" sea siempre visible aunque sin sentido. */
+  function garbageReadable(bytes) {
+    const chars = '!@#$%^&*ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz0123456789~|<>?/\\+-=';
+    return Array.from(bytes).map(b => chars[b % chars.length]).join('');
+  }
+
+  /* ==============================================================
+     INDICADOR DE FUERZA DE CLAVE
+     Puntúa de 0 a 4 según criterios acumulativos:
+       +1 si longitud ≥ 6
+       +1 si longitud ≥ 12
+       +1 si mezcla letras y números
+       +1 si contiene símbolos especiales
+     Colorea las 4 barras progresivamente: rojo→ámbar→azul→verde
+  ============================================================== */
+  function updateStrength(key) {
+    const bars  = ['sb1','sb2','sb3','sb4'].map(id => document.getElementById(id));
+    const label = document.getElementById('strength-label');
+    const wrap  = document.getElementById('key-strength');
+    if (!key) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    let score = 0;
+    if (key.length >= 6)  score++;
+    if (key.length >= 12) score++;
+    if (/[0-9]/.test(key) && /[a-zA-Z]/.test(key)) score++;
+    if (/[^a-zA-Z0-9]/.test(key)) score++;
+    const colors = ['#f87171','#f5a623','#4a9eff','#3ecf8e'];
+    const labels = ['Débil','Regular','Buena','Fuerte'];
+    bars.forEach((b,i) => b.style.background = i < score ? colors[score-1] : 'var(--border)');
+    label.textContent = labels[score-1] || '';
+    label.style.color = colors[score-1] || 'var(--text-muted)';
+  }
+
+  /* ==============================================================
+     UI — HELPERS
+  ============================================================== */
+
+  /* Alterna la visibilidad del campo password (ojo) */
+  function toggleEye(id) {
+    const inp = document.getElementById(id);
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  /* Handler de cambio en la clave del CODIFICADOR:
+     actualiza hint, fuerza, tag de modo y re-codifica si hay texto */
+  function onEncKeyChange() {
+    const key = document.getElementById('enc-secret-key').value;
+    document.getElementById('enc-key-hint').textContent = key ? key.length + ' car.' : 'sin clave';
+    updateStrength(key);
+    const tag = document.getElementById('enc-mode-tag');
+    tag.textContent = key ? '🔑 con clave' : 'sin clave';
+    tag.className   = key ? 'mode-tag on' : 'mode-tag off';
+    if (document.getElementById('enc-input').value) encode();
+  }
+
+  /* Handler de cambio en la clave del DECODIFICADOR:
+     NUNCA dispara decode() — solo actualiza el tag y limpia el resultado.
+     Esto evita el bug de mostrar resultados parciales mientras el usuario
+     está aún tecleando la clave letra a letra. */
+  function onDecKeyChange() {
+    const key    = document.getElementById('dec-secret-key').value;
+    const status = document.getElementById('dec-key-status');
+    const tag    = document.getElementById('dec-mode-tag');
+    status.textContent = key ? '↵ pulsa Descifrar' : 'sin clave';
+    status.className   = key ? 'key-status waiting' : 'key-status';
+    tag.textContent    = key ? '🔑 con clave' : 'sin clave';
+    tag.className      = key ? 'mode-tag on' : 'mode-tag off';
+    // Limpiar resultado anterior para no dejar datos obsoletos visibles
+    document.getElementById('dec-output').textContent = '';
+    document.getElementById('dec-output').className   = 'output-box';
+    document.getElementById('dec-pairs').innerHTML    = '';
+    document.getElementById('dec-xor-info').classList.remove('visible');
+    renderKeyboard([]);
+  }
+
+  /* Handler del textarea del código cifrado:
+     · Sin clave → decode en tiempo real (comportamiento cómodo)
+     · Con clave → solo limpiar y pedir confirmación explícita */
+  function onDecodeInput() {
+    const key = document.getElementById('dec-secret-key').value;
+    if (!key) {
+      decode();
+    } else {
+      document.getElementById('dec-output').textContent = '';
+      document.getElementById('dec-output').className   = 'output-box';
+      document.getElementById('dec-pairs').innerHTML    = '';
+      document.getElementById('dec-xor-info').classList.remove('visible');
+      const status = document.getElementById('dec-key-status');
+      status.textContent = '↵ pulsa Descifrar';
+      status.className   = 'key-status waiting';
+      renderKeyboard([]);
+    }
+  }
+
+  /* ==============================================================
+     COPIAR AL PORTAPAPELES
+     Intenta primero la Clipboard API moderna (requiere HTTPS).
+     Si falla (iframe, archivo local, navegador antiguo) usa el
+     método de respaldo con textarea temporal + execCommand.
+  ============================================================== */
+  function copyCode() {
+    const text = document.getElementById('enc-output').textContent;
+    if (!text) return;
+
+    const btn = document.getElementById('btn-copy');
+
+    function markCopied() {
+      btn.textContent = '✓ Copiado';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '⎘ Copiar'; btn.classList.remove('copied'); }, 2000);
+    }
+
+    // Método 1: Clipboard API moderna (Chrome, Firefox modernos con HTTPS)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(markCopied).catch(() => fallbackCopy(text, markCopied));
+    } else {
+      fallbackCopy(text, markCopied);
+    }
+  }
+
+  /* Método de respaldo: crea un textarea invisible, lo selecciona
+     y ejecuta el comando de copia del sistema.
+     Funciona en archivos locales, iframes y navegadores sin Clipboard API. */
+  function fallbackCopy(text, callback) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      callback();
+    } catch(e) {
+      console.warn('Copy failed:', e);
+    }
+    document.body.removeChild(ta);
+  }
+
+  /* ==============================================================
+     TECLADO VISUAL — renderKeyboard(highlights)
+     Reconstruye el HTML de las 5 filas aplicando clases de resaltado.
+     highlights: array de { lineaIdx, colIdx, tipo }
+       tipo = 'src'  → azul  (letra de referencia)
+       tipo = 'dst'  → verde (letra destino)
+       tipo = 'both' → ámbar (ref y destino coinciden, misma posición)
+     Las teclas de la línea 4 siempre usan 'hl-acc' (rosa) independientemente del tipo.
+  ============================================================== */
+  function renderKeyboard(highlights) {
+    for (let r = 0; r < LINEAS.length; r++) {
+      const rowEl = document.getElementById('kb-row' + r);
+      rowEl.innerHTML = '<span class="kb-label">' + LABELS[r] + '</span>';
+      const isAcc = (r === 4); // línea de acentuadas → estilo especial
+      LINEAS[r].forEach((tecla, i) => {
+        const hl  = highlights.find(h => h.lineaIdx === r && h.colIdx === i);
+        let cls   = 'key' + (isAcc ? ' accented-key' : '');
+        if (hl) cls += isAcc ? ' hl-acc' : ' hl-' + hl.tipo;
+        rowEl.innerHTML += '<span class="' + cls + '">' + tecla + '</span>';
+      });
+    }
+  }
+
+  /* ==============================================================
+     CODIFICADOR — encode()
+     Algoritmo de cifrado en dos capas:
+
+     CAPA 1 — QWERTY:
+     Para cada carácter del texto de entrada:
+       · Detectar si es minúscula (guardamos el caso original)
+       · Buscar en qué línea (1-4) está y su posición (colIdx)
+       · Elegir aleatoriamente UNA letra de esa misma línea como "referencia"
+       · Emitir: [ref][pos_base1]['.'] donde '.' indica minúscula
+       · Ejemplo: 'h' → línea 2, pos 6 → ref aleatoria 'D' → "D6."
+       · Caracteres no alfabéticos (espacios, puntuación) → se copian tal cual
+
+     CAPA 2 — XOR (solo si hay clave):
+       · El código QWERTY resultante se cifra con XOR
+       · El resultado se convierte a hexadecimal
+       · Sin clave: el código QWERTY se muestra directamente
+
+     La capa 1 es siempre transparente en el panel "Detalle de pares".
+  ============================================================== */
+  function encode() {
+    const raw = document.getElementById('enc-input').value;
+    const key = document.getElementById('enc-secret-key').value;
+    let qwCode = '', pares = [], hlights = [];
+
+    for (let i = 0; i < raw.length; i++) {
+      const ch      = raw[i];
+      const upper   = ch.toUpperCase();
+      // Detectar minúscula: ch difiere de su versión en mayúsculas
+      // (funciona también para acentuadas: 'é' !== 'É')
+      const isLower = ch !== upper && ch.toLowerCase() !== upper;
+      // Normalizar para buscar (sube acentuadas a su forma canónica)
+      const norm    = ACCENT_NORMALIZE[ch] || upper;
+      const found   = buscarLetra(norm);
+
+      if (found) {
+        const fila   = LINEAS[found.lineaIdx];
+        const pos    = found.colIdx + 1;           // posición base 1
+        const refIdx = randInt(fila.length);        // índice aleatorio en la misma fila
+        const ref    = fila[refIdx];               // letra de referencia
+        const isAcc  = (found.lineaIdx === 4);     // ¿es de la línea de acentuadas?
+
+        qwCode += ref + pos + (isLower ? '.' : ''); // punto = marcador de minúscula
+        pares.push({ original: norm, isLower, ref, pos,
+                     lineaIdx: found.lineaIdx, colIdx: found.colIdx, refIdx, isAcc });
+
+        // Resaltado: ref en azul, destino en verde; ámbar si coinciden
+        const tipoRef = (refIdx === found.colIdx) ? 'both' : 'src';
+        const tipoDst = (refIdx === found.colIdx) ? 'both' : 'dst';
+        hlights.push({ lineaIdx: found.lineaIdx, colIdx: refIdx,       tipo: tipoRef });
+        hlights.push({ lineaIdx: found.lineaIdx, colIdx: found.colIdx, tipo: tipoDst });
+      } else {
+        // Carácter no codificable (espacio, coma, número…) → pasa tal cual
+        qwCode += ch;
+        pares.push({ original: ch, isLower: false, ref: null, pos: null, lineaIdx: null, isAcc: false });
+      }
+    }
+
+    // Aplicar capa 2 XOR si hay clave
+    const finalCode = xorEncrypt(qwCode, key);
+    const hasKey    = !!key;
+    const outEl     = document.getElementById('enc-output');
+    outEl.textContent = finalCode;
+    outEl.className   = hasKey ? 'output-box locked' : 'output-box';
+
+    // Mostrar código QWERTY intermedio cuando hay clave activa
+    const xorInfoEl = document.getElementById('enc-xor-info');
+    if (hasKey && qwCode) {
+      xorInfoEl.classList.add('visible');
+      document.getElementById('enc-qwerty-preview').textContent =
+        qwCode.length > 40 ? qwCode.slice(0,40) + '…' : qwCode;
+    } else {
+      xorInfoEl.classList.remove('visible');
+    }
+
+    // Renderizar fichas de detalle por cada letra
+    document.getElementById('enc-pairs').innerHTML = pares.map(p => {
+      if (!p.ref) {
+        if (p.original === ' ') return '<span style="width:10px;display:inline-block"></span>';
+        return '<span class="pair-chip"><span style="color:var(--text-muted)">' + p.original + '</span></span>';
+      }
+      const cls = p.isAcc ? 'pair-chip accented' : 'pair-chip';
+      return '<span class="' + cls + '"><span class="ref">' + p.ref + '</span>' +
+             '<span class="pos">' + p.pos + '</span><span class="arr">→</span>' +
+             '<span class="dest">' + p.original + (p.isLower ? '·' : '') + '</span></span>';
+    }).join('');
+
+    renderKeyboard(hlights);
+  }
+
+  /* ==============================================================
+     DESCIFRADOR QWERTY — decodeQwerty(raw)
+     Recorre el código QWERTY carácter a carácter:
+       · Si es letra alfabética (líneas 1-4) → determina la línea
+         y consume los dígitos siguientes como número de posición
+         (puede ser de 1 o 2 dígitos, ej. "10" = posición diez)
+       · Si el siguiente carácter tras los dígitos es '.' → minúscula
+       · Si es otro carácter (espacio, puntuación) → copia tal cual
+       · Dígitos sin letra previa → se ignoran (código malformado)
+     Devuelve { texto, pares, hlights } para actualizar UI y teclado.
+  ============================================================== */
+  function decodeQwerty(raw) {
+    let texto = '', pares = [], hlights = [], i = 0;
+    while (i < raw.length) {
+      const ch    = raw[i];
+      const norm  = ACCENT_NORMALIZE[ch] || ch.toUpperCase();
+      const found = buscarLetra(norm);
+
+      if (found) {
+        const fila = LINEAS[found.lineaIdx];
+        i++; // consumir la letra de referencia
+
+        // Consumir dígitos consecutivos formando el número de posición
+        while (i < raw.length && /[0-9]/.test(raw[i])) {
+          // Leer el mayor número válido posible sin superar fila.length
+          // (evita leer "10" como "1" + "0" cuando la fila tiene 10 elementos)
+          let numStr = '', j = i;
+          while (j < raw.length && /[0-9]/.test(raw[j])) {
+            const cand = numStr + raw[j];
+            if (parseInt(cand) > fila.length) break; // número demasiado grande
+            numStr += raw[j]; j++;
+          }
+          if (numStr === '') { i++; break; } // dígito no válido como posición
+          i = j;
+
+          const destIdx = parseInt(numStr) - 1; // convertir a índice base 0
+          if (destIdx >= 0 && destIdx < fila.length) {
+            const destChar = fila[destIdx];
+            // El punto siguiente marca que la letra original era minúscula
+            const isLower  = (i < raw.length && raw[i] === '.');
+            if (isLower) i++; // consumir el punto
+
+            texto += isLower ? destChar.toLowerCase() : destChar;
+            pares.push({ ref: norm, pos: numStr,
+                         dest: isLower ? destChar.toLowerCase() : destChar,
+                         lineaIdx: found.lineaIdx, refIdx: found.colIdx, destIdx,
+                         isAcc: (found.lineaIdx === 4) });
+
+            const tipoRef  = (found.colIdx === destIdx) ? 'both' : 'src';
+            const tipoDest = (found.colIdx === destIdx) ? 'both' : 'dst';
+            hlights.push({ lineaIdx: found.lineaIdx, colIdx: found.colIdx, tipo: tipoRef  });
+            hlights.push({ lineaIdx: found.lineaIdx, colIdx: destIdx,      tipo: tipoDest });
+          } else {
+            // Posición fuera del rango de la línea → error de código
+            texto += '?';
+            pares.push({ ref: norm, pos: numStr, dest: '?', lineaIdx: null, isAcc: false });
+          }
+        }
+      } else if (/[^A-ZÑÁÉÍÓÚÜÀÈÌÒÙÏa-zñáéíóúüàèìòùï0-9.]/.test(ch)) {
+        // Carácter no alfabético y no dígito ni punto → copiar tal cual
+        texto += ch;
+        pares.push({ ref: ch, pos: null, dest: ch, lineaIdx: null, isAcc: false });
+        i++;
+      } else {
+        i++; // dígito o punto sin letra precedente → ignorar
+      }
+    }
+    return { texto, pares, hlights };
+  }
+
+  /* ==============================================================
+     DECODE — función principal del decodificador
+     Llamada por: botón "Descifrar" o tecla Enter en el campo de clave.
+     NO se llama en tiempo real mientras se teclea la clave.
+
+     Flujo completo:
+       1. Si hay clave → xorDecrypt(hex, clave)
+          · ok=true  → qwCode = código QWERTY recuperado → continúa
+          · ok=false → texto basura visible → muestra en rojo y termina
+       2. decodeQwerty(qwCode) → texto plano
+       3. Actualizar UI: resultado, pares, teclado, estado de clave
+  ============================================================== */
+  function decode() {
+    const rawInput = document.getElementById('dec-input').value.trim();
+    const key      = document.getElementById('dec-secret-key').value;
+    const statusEl = document.getElementById('dec-key-status');
+
+    let qwCode    = rawInput;
+    let isGarbage = false;
+
+    if (key) {
+      const result = xorDecrypt(rawInput, key);
+      qwCode    = result.text;
+      isGarbage = !result.ok;
+      // Feedback visual del resultado de la verificación de clave
+      statusEl.textContent = isGarbage ? '✗ clave incorrecta' : '✓ clave correcta';
+      statusEl.className   = isGarbage ? 'key-status' : 'key-status ok';
+      statusEl.style.color = isGarbage ? '#c05050' : '';
+    } else {
+      statusEl.textContent = 'sin clave';
+      statusEl.className   = 'key-status';
+      statusEl.style.color = '';
+    }
+
+    // Mostrar código QWERTY intermedio (solo si clave correcta)
+    const xorInfoEl = document.getElementById('dec-xor-info');
+    if (key && !isGarbage && qwCode) {
+      xorInfoEl.classList.add('visible');
+      document.getElementById('dec-qwerty-preview').textContent =
+        qwCode.length > 40 ? qwCode.slice(0,40) + '…' : qwCode;
+    } else {
+      xorInfoEl.classList.remove('visible');
+    }
+
+    const outEl = document.getElementById('dec-output');
+
+    if (isGarbage) {
+      // Clave incorrecta: mostrar basura visible en rojo
+      // No intentar pasar por decodeQwerty (el texto sería incomprensible igual)
+      outEl.textContent = qwCode;
+      outEl.className   = 'output-box garbage';
+      document.getElementById('dec-pairs').innerHTML = '';
+      renderKeyboard([]);
+      return;
+    }
+
+    // Clave correcta (o sin clave): descifrar la capa QWERTY
+    const { texto, pares, hlights } = decodeQwerty(qwCode);
+    outEl.textContent = texto;
+    outEl.className   = 'output-box';
+
+    document.getElementById('dec-pairs').innerHTML = pares.map(p => {
+      if (!p.pos) return '<span class="pair-chip"><span style="color:var(--text-muted)">' + p.ref + '</span></span>';
+      const cls = p.isAcc ? 'pair-chip accented' : 'pair-chip';
+      return '<span class="' + cls + '"><span class="ref">' + p.ref + '</span>' +
+             '<span class="pos">' + p.pos + '</span><span class="arr">→</span>' +
+             '<span class="dest">' + p.dest + '</span></span>';
+    }).join('');
+
+    renderKeyboard(hlights);
+  }
+
+  /* ==============================================================
+     HANDLERS SIMPLES
+  ============================================================== */
+
+  /* Re-codifica en tiempo real cuando el usuario escribe */
+  function onEncodeInput() { encode(); }
+
+  /* Limpia el panel codificador completamente */
+  function clearEncode() {
+    document.getElementById('enc-input').value        = '';
+    document.getElementById('enc-output').textContent = '';
+    document.getElementById('enc-pairs').innerHTML    = '';
+    document.getElementById('enc-xor-info').classList.remove('visible');
+    renderKeyboard([]);
+  }
+
+  /* ==============================================================
+     INICIALIZACIÓN
+     Dibuja el teclado vacío al cargar la página.
+  ============================================================== */
+  renderKeyboard([]);
+
+</script>
+</body>
+</html>
