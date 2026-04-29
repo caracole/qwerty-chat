@@ -106,6 +106,22 @@
 
     footer{text-align:center;color:var(--muted);font-size:13px;
            font-family:'Space Mono',monospace;letter-spacing:1px;margin-top:60px}
+
+    /* Boutons de partage */
+    .share-app-btn{
+      display:inline-flex;align-items:center;gap:5px;
+      font-family:'Space Mono',monospace;font-size:11px;
+      padding:6px 12px;border-radius:8px;border:1px solid var(--brd);
+      background:var(--surf2);cursor:pointer;transition:all .15s;
+      white-space:nowrap;letter-spacing:.3px;
+    }
+    .share-app-btn:hover{opacity:.85;transform:translateY(-1px)}
+    .share-app-btn.wa{border-color:#25d366;color:#25d366}
+    .share-app-btn.tg{border-color:#2aabee;color:#2aabee}
+    .share-app-btn.sg{border-color:#3a76f0;color:#3a76f0}
+    .share-app-btn.ml{border-color:var(--amber);color:var(--amber)}
+    .share-app-btn.cp{border-color:var(--brd);color:var(--muted)}
+    .share-app-btn.cp.copied{border-color:var(--green);color:var(--green);background:#0f2a1a}
   </style>
 </head>
 <body>
@@ -127,6 +143,20 @@
   </div>
   <p class="hero-sub" data-i18n="hero_sub"></p>
   <a href="cifrador_qwerty.html" class="btn-hero" data-i18n="hero_btn"></a>
+
+  <!-- Partager le lien de l'application -->
+  <div style="margin-top:20px">
+    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;
+                color:var(--muted);margin-bottom:10px;font-family:'Space Mono',monospace"
+         data-i18n="lbl_share_app"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button class="share-app-btn wa" onclick="shareApp('wa')">📗 WhatsApp</button>
+      <button class="share-app-btn tg" onclick="shareApp('tg')">✈️ Telegram</button>
+      <button class="share-app-btn sg" onclick="shareApp('sg')">🔵 Signal</button>
+      <button class="share-app-btn ml" onclick="shareApp('ml')">📧 Email</button>
+      <button class="share-app-btn cp" id="share-app-cp" onclick="shareApp('cp')" data-i18n="btn_copy_link">⎘ Lien</button>
+    </div>
+  </div>
 </div>
 
 <!-- L'INVENTION -->
@@ -264,6 +294,11 @@ const T = {
     cred_phg:    "Ingénieur informatique · Inventeur du système · Idée originale",
     cred_claude: "Assistant IA · Implémentation · Code · Design",
     cred_note:   "Ce projet a été conçu et développé en entier dans une seule session de conversation.\nL'invention du préfixe aléatoire sur les lignes QWERTY est originale et appartient à Pierre-Henri Giraud.",
+    lbl_share_app: "Partager l'application",
+    btn_copy_link: "⎘ Lien",
+    copied:        "Copié !",
+    signal_hint:   "Lien copié ! Colle-le dans Signal.",
+    share_msg:     "Découvre QWERTY Cipher — app de messages chiffrés :",
   },
   es: {
     hero_sub:    "Un sistema de cifrado original basado en las líneas del teclado QWERTY.\nMensajes secretos, chat en tiempo real, aplicación móvil.",
@@ -290,6 +325,11 @@ const T = {
     cred_phg:    "Ingeniero informático · Inventor del sistema · Idea original",
     cred_claude: "Asistente IA · Implementación · Código · Diseño",
     cred_note:   "Este proyecto fue concebido y desarrollado en una sola sesión de conversación.\nLa invención del prefijo aleatorio sobre las líneas QWERTY es original y pertenece a Pierre-Henri Giraud.",
+    lbl_share_app: "Compartir la aplicación",
+    btn_copy_link: "⎘ Enlace",
+    copied:        "¡Copiado!",
+    signal_hint:   "¡Enlace copiado! Pégalo en Signal.",
+    share_msg:     "Descubre QWERTY Cipher — app de mensajes cifrados :",
   },
   en: {
     hero_sub:    "An original encryption system based on the QWERTY keyboard rows.\nSecret messages, real-time chat, mobile application.",
@@ -316,6 +356,11 @@ const T = {
     cred_phg:    "Computer engineer · System inventor · Original idea",
     cred_claude: "AI assistant · Implementation · Code · Design",
     cred_note:   "This project was conceived and developed entirely in a single conversation session.\nThe random prefix invention on QWERTY rows is original and belongs to Pierre-Henri Giraud.",
+    lbl_share_app: "Share the application",
+    btn_copy_link: "⎘ Link",
+    copied:        "Copied!",
+    signal_hint:   "Link copied! Paste it in Signal.",
+    share_msg:     "Discover QWERTY Cipher — encrypted messages app:",
   },
   ru: {
     hero_sub:    "Оригинальная система шифрования на основе строк клавиатуры QWERTY.\nСекретные сообщения, чат в реальном времени, мобильное приложение.",
@@ -342,11 +387,72 @@ const T = {
     cred_phg:    "Инженер-программист · Изобретатель системы · Оригинальная идея",
     cred_claude: "ИИ-ассистент · Реализация · Код · Дизайн",
     cred_note:   "Этот проект был задуман и разработан целиком в ходе одной беседы.\nИзобретение случайного префикса на строках QWERTY оригинально и принадлежит Пьеру-Анри Жиро.",
+    lbl_share_app: "Поделиться приложением",
+    btn_copy_link: "⎘ Ссылка",
+    copied:        "Скопировано!",
+    signal_hint:   "Ссылка скопирована! Вставьте в Signal.",
+    share_msg:     "Откройте QWERTY Cipher — приложение для зашифрованных сообщений:",
   }
 };
 
 /* Langue active */
 let currentLang = 'fr';
+
+/* ================================================================
+   PARTAGER LE LIEN DE L'APPLICATION
+================================================================ */
+const APP_URL = 'https://caracole.github.io/qwerty-chat/cifrador_qwerty.html';
+
+function shareApp(app) {
+  const t   = T[currentLang] || T['fr'];
+  const msg = encodeURIComponent((t.share_msg || 'QWERTY Cipher — app de messages chiffrés :') + ' ' + APP_URL);
+
+  switch(app) {
+    case 'wa':
+      window.open('https://wa.me/?text=' + msg, '_blank');
+      break;
+    case 'tg':
+      window.open('https://t.me/share/url?url=' + encodeURIComponent(APP_URL) +
+                  '&text=' + encodeURIComponent(t.share_msg || 'QWERTY Cipher'), '_blank');
+      break;
+    case 'sg':
+      copyLink();
+      alert(t.signal_hint || 'Lien copié ! Colle-le dans Signal.');
+      break;
+    case 'ml':
+      window.location.href = 'mailto:?subject=' +
+        encodeURIComponent('QWERTY Cipher') + '&body=' + msg;
+      break;
+    case 'cp':
+      copyLink();
+      break;
+  }
+}
+
+function copyLink() {
+  const btn  = document.getElementById('share-app-cp');
+  const t    = T[currentLang] || T['fr'];
+  const done = () => {
+    btn.textContent = '✓ ' + (t.copied || 'Copié !');
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = t.btn_copy_link || '⎘ Lien';
+      btn.classList.remove('copied');
+    }, 2000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(APP_URL).then(done).catch(() => fbCopy(done));
+  } else { fbCopy(done); }
+}
+
+function fbCopy(callback) {
+  const ta = document.createElement('textarea');
+  ta.value = APP_URL;
+  ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); callback(); } catch(e) {}
+  document.body.removeChild(ta);
+}
 
 /* Appliquer une langue */
 function setLang(lang) {
