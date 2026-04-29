@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QWERTY Cipher — Le projet</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#0f0f12; --surf:#1a1a22; --surf2:#22222e; --brd:#2e2e3e;
+      --blue:#4a9eff; --green:#3ecf8e; --amber:#f5a623; --pink:#e06cff;
+      --txt:#e8e8f0; --muted:#6b6b80;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);
+         min-height:100vh;padding:40px 20px 80px}
+
+    /* HERO */
+    .hero{text-align:center;padding:60px 20px 50px;max-width:700px;margin:0 auto}
+    .hero-title{font-family:'Space Mono',monospace;font-size:clamp(28px,5vw,52px);
+                letter-spacing:4px;margin-bottom:16px}
+    .hero-title .b{color:var(--blue)}
+    .hero-title .g{color:var(--green)}
+    .hero-sub{font-size:18px;color:var(--muted);line-height:1.7;margin-bottom:32px}
+    .btn-hero{display:inline-block;background:var(--blue);color:#000;
+              font-family:'Space Mono',monospace;font-size:14px;font-weight:700;
+              letter-spacing:1px;padding:14px 32px;border-radius:10px;
+              text-decoration:none;transition:opacity .15s}
+    .btn-hero:hover{opacity:.85}
+
+    /* SECTION */
+    .section{max-width:700px;margin:0 auto 60px}
+    .section-title{font-family:'Space Mono',monospace;font-size:13px;
+                   letter-spacing:3px;text-transform:uppercase;
+                   color:var(--amber);margin-bottom:24px;
+                   padding-bottom:10px;border-bottom:1px solid var(--brd)}
+
+    /* INVENTION CARD */
+    .invention{background:var(--surf);border:1px solid var(--brd);
+               border-top:3px solid var(--amber);border-radius:12px;padding:28px}
+    .invention h2{font-size:20px;font-weight:600;margin-bottom:16px;color:var(--txt)}
+    .invention p{color:#c0c0d0;line-height:1.8;margin-bottom:16px;font-size:16px}
+
+    /* EXEMPLE VISUEL */
+    .example{background:var(--surf2);border-radius:10px;padding:20px;margin:20px 0}
+    .example-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;
+                   color:var(--muted);margin-bottom:14px}
+    .example-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;
+                 flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:14px}
+    .letter{background:var(--blue);color:#000;padding:6px 14px;border-radius:6px;font-weight:700}
+    .arrow{color:var(--muted)}
+    .line-info{color:var(--muted);font-size:13px}
+    .codes{display:flex;gap:8px;flex-wrap:wrap}
+    .code-chip{background:var(--surf);border:1px solid var(--brd);
+               border-radius:6px;padding:4px 10px;font-size:13px}
+    .code-chip span{color:var(--blue)}
+    .code-chip em{color:var(--amber);font-style:normal}
+    .note{font-size:13px;color:var(--green);margin-top:12px;font-style:italic}
+
+    /* KEYBOARD LINES */
+    .kb-lines{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+    .kb-line{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+    .kb-label{font-size:11px;color:var(--muted);width:60px;font-family:'Space Mono',monospace}
+    .key{display:inline-flex;align-items:center;justify-content:center;
+         width:32px;height:32px;border-radius:5px;background:var(--surf2);
+         border:1px solid var(--brd);font-family:'Space Mono',monospace;
+         font-size:12px;font-weight:700;color:var(--muted)}
+    .key.hl{background:#1a3a5c;border-color:var(--blue);color:var(--blue)}
+
+    /* FEATURES */
+    .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+    .feat{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px}
+    .feat-icon{font-size:28px;margin-bottom:10px}
+    .feat-title{font-weight:600;font-size:15px;margin-bottom:6px}
+    .feat-body{font-size:13px;color:var(--muted);line-height:1.6}
+
+    /* CREDITS */
+    .credits{background:var(--surf);border:1px solid var(--brd);border-radius:12px;
+             padding:28px;text-align:center}
+    .credits h2{font-size:20px;font-weight:600;margin-bottom:20px}
+    .credit-row{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+    .credit-person{display:flex;flex-direction:column;align-items:center;gap:8px}
+    .avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:20px}
+    .avatar.human{background:#1a3a5c;border:2px solid var(--blue);color:var(--blue)}
+    .avatar.ai{background:#0f3326;border:2px solid var(--green);color:var(--green)}
+    .credit-name{font-weight:600;font-size:16px}
+    .credit-role{font-size:13px;color:var(--muted);text-align:center;max-width:160px;line-height:1.5}
+    .credit-divider{display:flex;align-items:center;color:var(--muted);font-size:24px;padding-top:16px}
+
+    /* FOOTER */
+    footer{text-align:center;color:var(--muted);font-size:13px;
+           font-family:'Space Mono',monospace;letter-spacing:1px;margin-top:60px}
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-title">
+    <span class="b">QWERTY</span> <span class="g">CIPHER</span>
+  </div>
+  <p class="hero-sub">
+    Un système de chiffrement original basé sur les lignes du clavier QWERTY.<br>
+    Messages secrets, chat en temps réel, application mobile.
+  </p>
+  <a href="cifrador_qwerty.html" class="btn-hero">Ouvrir l'application →</a>
+</div>
+
+<!-- L'INVENTION -->
+<div class="section">
+  <div class="section-title">✦ L'invention originale</div>
+  <div class="invention">
+    <h2>Le principe du préfixe aléatoire</h2>
+    <p>
+      L'idée centrale de ce système est simple et élégante : chaque lettre est codée
+      par sa <strong style="color:var(--amber)">position dans sa ligne du clavier</strong>,
+      précédée d'une <strong style="color:var(--blue)">lettre de référence aléatoire</strong>
+      choisie dans cette même ligne.
+    </p>
+    <p>
+      Ce qui rend ce système original : la lettre de référence change à chaque encodage.
+      La même lettre <strong style="color:var(--green)">H</strong> peut donner
+      <code style="color:var(--amber)">A6</code>, <code style="color:var(--amber)">D6</code>,
+      <code style="color:var(--amber)">S6</code> ou <code style="color:var(--amber)">K6</code>
+      — toujours différent. L'analyse fréquentielle devient impossible.
+    </p>
+
+    <!-- Exemple visuel -->
+    <div class="example">
+      <div class="example-title">Exemple — encoder la lettre H</div>
+
+      <!-- Lignes du clavier -->
+      <div class="kb-lines">
+        <div class="kb-line">
+          <span class="kb-label">Ligne 2</span>
+          <div class="key">A</div><div class="key">S</div><div class="key">D</div>
+          <div class="key">F</div><div class="key">G</div><div class="key hl">H</div>
+          <div class="key">J</div><div class="key">K</div><div class="key">L</div><div class="key">Ñ</div>
+        </div>
+      </div>
+
+      <div class="example-row">
+        <div class="letter">H</div>
+        <div class="arrow">→</div>
+        <div class="line-info">Ligne 2, position 6</div>
+      </div>
+      <div class="example-row">
+        <div class="line-info">Encodages possibles (tous valides) :</div>
+      </div>
+      <div class="codes">
+        <div class="code-chip"><span>A</span><em>6</em></div>
+        <div class="code-chip"><span>S</span><em>6</em></div>
+        <div class="code-chip"><span>D</span><em>6</em></div>
+        <div class="code-chip"><span>F</span><em>6</em></div>
+        <div class="code-chip"><span>G</span><em>6</em></div>
+        <div class="code-chip"><span>H</span><em>6</em></div>
+        <div class="code-chip"><span>J</span><em>6</em></div>
+        <div class="code-chip"><span>K</span><em>6</em></div>
+        <div class="code-chip"><span>L</span><em>6</em></div>
+        <div class="code-chip"><span>Ñ</span><em>6</em></div>
+      </div>
+      <div class="note">
+        ✦ 10 encodages différents pour la même lettre → analyse fréquentielle impossible
+      </div>
+    </div>
+
+    <p style="margin-bottom:0">
+      Une deuxième couche de chiffrement <strong style="color:var(--pink)">XOR</strong>
+      avec une clé secrète personnelle vient ensuite transformer le code en hexadécimal opaque.
+      Le résultat est illisible sans connaître la clé.
+    </p>
+  </div>
+</div>
+
+<!-- FONCTIONNALITÉS -->
+<div class="section">
+  <div class="section-title">⬡ Ce que fait l'application</div>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">🔐</div>
+      <div class="feat-title">Double chiffrement</div>
+      <div class="feat-body">QWERTY (couche 1) + XOR avec clé secrète (couche 2)</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">✦</div>
+      <div class="feat-title">Vocales accentuées</div>
+      <div class="feat-body">Ligne 4 spéciale : á é í ó ú ü à è ì ò ù ï</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title">Application mobile</div>
+      <div class="feat-body">PWA installable sur Android et iOS comme une vraie app</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">💬</div>
+      <div class="feat-title">Chat temps réel</div>
+      <div class="feat-body">Serveur Node.js + WebSockets pour communiquer en direct</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">☁️</div>
+      <div class="feat-title">Sans serveur</div>
+      <div class="feat-body">Version JSONBin : aucun serveur, juste un fichier HTML</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">👁</div>
+      <div class="feat-title">Teclado visual</div>
+      <div class="feat-body">Visualisation en temps réel des touches utilisées</div>
+    </div>
+  </div>
+</div>
+
+<!-- CRÉDITS -->
+<div class="section">
+  <div class="section-title">❤ Crédits</div>
+  <div class="credits">
+    <h2>Un projet né d'une collaboration</h2>
+    <div class="credit-row">
+      <div class="credit-person">
+        <div class="avatar human">PHG</div>
+        <div class="credit-name">Pierre-Henri Giraud</div>
+        <div class="credit-role">Ingénieur informatique · Inventeur du système · Idée originale</div>
+      </div>
+      <div class="credit-divider">×</div>
+      <div class="credit-person">
+        <div class="avatar ai">AI</div>
+        <div class="credit-name">Claude</div>
+        <div class="credit-role">Assistant IA · Implémentation · Code · Design</div>
+      </div>
+    </div>
+    <p style="margin-top:24px;color:var(--muted);font-size:14px;line-height:1.7">
+      Ce projet a été conçu et développé en entier dans une seule session de conversation.<br>
+      L'invention du préfixe aléatoire sur les lignes QWERTY est originale et appartient à Pierre-Henri Giraud.
+    </p>
+  </div>
+</div>
+
+<footer>
+  QWERTY Cipher · 2026 · Pierre-Henri Giraud × Claude
+</footer>
+
+</body>
+</html>
