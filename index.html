@@ -15,6 +15,22 @@
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);
          min-height:100vh;padding:40px 20px 80px}
 
+    /* SÉLECTEUR DE LANGUE */
+    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100}
+    .lang-select{
+      font-family:var(--sans);font-size:14px;padding:5px 10px 5px 8px;
+      border-radius:8px;border:1px solid var(--brd);
+      background:var(--surf2);color:var(--txt);
+      cursor:pointer;outline:none;transition:border-color .2s;
+      appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b80'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 8px center;
+      padding-right:26px;
+    }
+    .lang-select:hover{border-color:var(--amber)}
+    .lang-select:focus{border-color:var(--amber)}
+    .lang-select option{background:#1a1a22;color:var(--txt)}
+
     /* HERO */
     .hero{text-align:center;padding:60px 20px 50px;max-width:700px;margin:0 auto}
     .hero-title{font-family:'Space Mono',monospace;font-size:clamp(28px,5vw,52px);
@@ -88,65 +104,55 @@
     .credit-role{font-size:13px;color:var(--muted);text-align:center;max-width:160px;line-height:1.5}
     .credit-divider{display:flex;align-items:center;color:var(--muted);font-size:24px;padding-top:16px}
 
-    /* FOOTER */
     footer{text-align:center;color:var(--muted);font-size:13px;
            font-family:'Space Mono',monospace;letter-spacing:1px;margin-top:60px}
   </style>
 </head>
 <body>
 
+<!-- SÉLECTEUR DE LANGUE -->
+<div class="lang-select-wrap">
+  <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
+    <option value="fr">🇫🇷 Français</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="ru">🇷🇺 Русский</option>
+  </select>
+</div>
+
 <!-- HERO -->
 <div class="hero">
   <div class="hero-title">
     <span class="b">QWERTY</span> <span class="g">CIPHER</span>
   </div>
-  <p class="hero-sub">
-    Un système de chiffrement original basé sur les lignes du clavier QWERTY.<br>
-    Messages secrets, chat en temps réel, application mobile.
-  </p>
-  <a href="cifrador_qwerty.html" class="btn-hero">Ouvrir l'application →</a>
+  <p class="hero-sub" data-i18n="hero_sub"></p>
+  <a href="cifrador_qwerty.html" class="btn-hero" data-i18n="hero_btn"></a>
 </div>
 
 <!-- L'INVENTION -->
 <div class="section">
-  <div class="section-title">✦ L'invention originale</div>
+  <div class="section-title" data-i18n="inv_title"></div>
   <div class="invention">
-    <h2>Le principe du préfixe aléatoire</h2>
-    <p>
-      L'idée centrale de ce système est simple et élégante : chaque lettre est codée
-      par sa <strong style="color:var(--amber)">position dans sa ligne du clavier</strong>,
-      précédée d'une <strong style="color:var(--blue)">lettre de référence aléatoire</strong>
-      choisie dans cette même ligne.
-    </p>
-    <p>
-      Ce qui rend ce système original : la lettre de référence change à chaque encodage.
-      La même lettre <strong style="color:var(--green)">H</strong> peut donner
-      <code style="color:var(--amber)">A6</code>, <code style="color:var(--amber)">D6</code>,
-      <code style="color:var(--amber)">S6</code> ou <code style="color:var(--amber)">K6</code>
-      — toujours différent. L'analyse fréquentielle devient impossible.
-    </p>
-
-    <!-- Exemple visuel -->
+    <h2 data-i18n="inv_h2"></h2>
+    <p data-i18n="inv_p1"></p>
+    <p data-i18n="inv_p2"></p>
     <div class="example">
-      <div class="example-title">Exemple — encoder la lettre H</div>
-
-      <!-- Lignes du clavier -->
+      <div class="example-title" data-i18n="ex_title"></div>
       <div class="kb-lines">
         <div class="kb-line">
-          <span class="kb-label">Ligne 2</span>
+          <span class="kb-label" data-i18n="line2"></span>
           <div class="key">A</div><div class="key">S</div><div class="key">D</div>
           <div class="key">F</div><div class="key">G</div><div class="key hl">H</div>
           <div class="key">J</div><div class="key">K</div><div class="key">L</div><div class="key">Ñ</div>
         </div>
       </div>
-
       <div class="example-row">
         <div class="letter">H</div>
         <div class="arrow">→</div>
-        <div class="line-info">Ligne 2, position 6</div>
+        <div class="line-info" data-i18n="ex_pos"></div>
       </div>
       <div class="example-row">
-        <div class="line-info">Encodages possibles (tous valides) :</div>
+        <div class="line-info" data-i18n="ex_possible"></div>
       </div>
       <div class="codes">
         <div class="code-chip"><span>A</span><em>6</em></div>
@@ -160,84 +166,205 @@
         <div class="code-chip"><span>L</span><em>6</em></div>
         <div class="code-chip"><span>Ñ</span><em>6</em></div>
       </div>
-      <div class="note">
-        ✦ 10 encodages différents pour la même lettre → analyse fréquentielle impossible
-      </div>
+      <div class="note" data-i18n="ex_note"></div>
     </div>
-
-    <p style="margin-bottom:0">
-      Une deuxième couche de chiffrement <strong style="color:var(--pink)">XOR</strong>
-      avec une clé secrète personnelle vient ensuite transformer le code en hexadécimal opaque.
-      Le résultat est illisible sans connaître la clé.
-    </p>
+    <p style="margin-bottom:0" data-i18n="inv_p3"></p>
   </div>
 </div>
 
 <!-- FONCTIONNALITÉS -->
 <div class="section">
-  <div class="section-title">⬡ Ce que fait l'application</div>
+  <div class="section-title" data-i18n="feat_title"></div>
   <div class="features">
-    <div class="feat">
-      <div class="feat-icon">🔐</div>
-      <div class="feat-title">Double chiffrement</div>
-      <div class="feat-body">QWERTY (couche 1) + XOR avec clé secrète (couche 2)</div>
-    </div>
-    <div class="feat">
-      <div class="feat-icon">✦</div>
-      <div class="feat-title">Vocales accentuées</div>
-      <div class="feat-body">Ligne 4 spéciale : á é í ó ú ü à è ì ò ù ï</div>
-    </div>
-    <div class="feat">
-      <div class="feat-icon">📱</div>
-      <div class="feat-title">Application mobile</div>
-      <div class="feat-body">PWA installable sur Android et iOS comme une vraie app</div>
-    </div>
-    <div class="feat">
-      <div class="feat-icon">💬</div>
-      <div class="feat-title">Chat temps réel</div>
-      <div class="feat-body">Serveur Node.js + WebSockets pour communiquer en direct</div>
-    </div>
-    <div class="feat">
-      <div class="feat-icon">☁️</div>
-      <div class="feat-title">Sans serveur</div>
-      <div class="feat-body">Version JSONBin : aucun serveur, juste un fichier HTML</div>
-    </div>
-    <div class="feat">
-      <div class="feat-icon">👁</div>
-      <div class="feat-title">Teclado visual</div>
-      <div class="feat-body">Visualisation en temps réel des touches utilisées</div>
-    </div>
+    <div class="feat"><div class="feat-icon">🔐</div>
+      <div class="feat-title" data-i18n="f1_t"></div>
+      <div class="feat-body" data-i18n="f1_b"></div></div>
+    <div class="feat"><div class="feat-icon">✦</div>
+      <div class="feat-title" data-i18n="f2_t"></div>
+      <div class="feat-body" data-i18n="f2_b"></div></div>
+    <div class="feat"><div class="feat-icon">📱</div>
+      <div class="feat-title" data-i18n="f3_t"></div>
+      <div class="feat-body" data-i18n="f3_b"></div></div>
+    <div class="feat"><div class="feat-icon">💬</div>
+      <div class="feat-title" data-i18n="f4_t"></div>
+      <div class="feat-body" data-i18n="f4_b"></div></div>
+    <div class="feat"><div class="feat-icon">☁️</div>
+      <div class="feat-title" data-i18n="f5_t"></div>
+      <div class="feat-body" data-i18n="f5_b"></div></div>
+    <div class="feat"><div class="feat-icon">👁</div>
+      <div class="feat-title" data-i18n="f6_t"></div>
+      <div class="feat-body" data-i18n="f6_b"></div></div>
   </div>
 </div>
 
 <!-- CRÉDITS -->
 <div class="section">
-  <div class="section-title">❤ Crédits</div>
+  <div class="section-title" data-i18n="cred_title"></div>
   <div class="credits">
-    <h2>Un projet né d'une collaboration</h2>
+    <h2 data-i18n="cred_h2"></h2>
     <div class="credit-row">
       <div class="credit-person">
         <div class="avatar human">PHG</div>
         <div class="credit-name">Pierre-Henri Giraud</div>
-        <div class="credit-role">Ingénieur informatique · Inventeur du système · Idée originale</div>
+        <div class="credit-role" data-i18n="cred_phg"></div>
       </div>
       <div class="credit-divider">×</div>
       <div class="credit-person">
         <div class="avatar ai">AI</div>
         <div class="credit-name">Claude</div>
-        <div class="credit-role">Assistant IA · Implémentation · Code · Design</div>
+        <div class="credit-role" data-i18n="cred_claude"></div>
       </div>
     </div>
-    <p style="margin-top:24px;color:var(--muted);font-size:14px;line-height:1.7">
-      Ce projet a été conçu et développé en entier dans une seule session de conversation.<br>
-      L'invention du préfixe aléatoire sur les lignes QWERTY est originale et appartient à Pierre-Henri Giraud.
-    </p>
+    <p style="margin-top:24px;color:var(--muted);font-size:14px;line-height:1.7"
+       data-i18n="cred_note"></p>
   </div>
 </div>
 
-<footer>
-  QWERTY Cipher · 2026 · Pierre-Henri Giraud × Claude
-</footer>
+<footer>QWERTY Cipher · 2026 · Pierre-Henri Giraud × Claude</footer>
 
+<script>
+/* ================================================================
+   TRADUCTIONS — FR / ES / EN
+================================================================ */
+const T = {
+  fr: {
+    hero_sub:    "Un système de chiffrement original basé sur les lignes du clavier QWERTY.\nMessages secrets, chat en temps réel, application mobile.",
+    hero_btn:    "Ouvrir l'application →",
+    inv_title:   "✦ L'invention originale",
+    inv_h2:      "Le principe du préfixe aléatoire",
+    inv_p1:      "L'idée centrale est simple et élégante : chaque lettre est codée par sa <strong style='color:var(--amber)'>position dans sa ligne du clavier</strong>, précédée d'une <strong style='color:var(--blue)'>lettre de référence aléatoire</strong> choisie dans cette même ligne.",
+    inv_p2:      "Ce qui rend ce système original : la lettre de référence change à chaque encodage. La même lettre <strong style='color:var(--green)'>H</strong> peut donner <code style='color:var(--amber)'>A6</code>, <code style='color:var(--amber)'>D6</code>, <code style='color:var(--amber)'>S6</code> ou <code style='color:var(--amber)'>K6</code> — toujours différent. L'analyse fréquentielle devient impossible.",
+    inv_p3:      "Une deuxième couche de chiffrement <strong style='color:var(--pink)'>XOR</strong> avec une clé secrète personnelle vient ensuite transformer le code en hexadécimal opaque. Le résultat est illisible sans connaître la clé.",
+    ex_title:    "Exemple — encoder la lettre H",
+    line2:       "Ligne 2",
+    ex_pos:      "Ligne 2, position 6",
+    ex_possible: "Encodages possibles (tous valides) :",
+    ex_note:     "✦ 10 encodages différents pour la même lettre → analyse fréquentielle impossible",
+    feat_title:  "⬡ Ce que fait l'application",
+    f1_t:"Double chiffrement",   f1_b:"QWERTY (couche 1) + XOR avec clé secrète (couche 2)",
+    f2_t:"Voyelles accentuées",  f2_b:"Ligne 4 spéciale : á é í ó ú ü à è ì ò ù ï",
+    f3_t:"Application mobile",  f3_b:"PWA installable sur Android et iOS comme une vraie app",
+    f4_t:"Chat temps réel",     f4_b:"Serveur Node.js + WebSockets pour communiquer en direct",
+    f5_t:"Sans serveur",        f5_b:"Version JSONBin : aucun serveur, juste un fichier HTML",
+    f6_t:"Clavier visuel",      f6_b:"Visualisation en temps réel des touches utilisées",
+    cred_title:  "❤ Crédits",
+    cred_h2:     "Un projet né d'une collaboration",
+    cred_phg:    "Ingénieur informatique · Inventeur du système · Idée originale",
+    cred_claude: "Assistant IA · Implémentation · Code · Design",
+    cred_note:   "Ce projet a été conçu et développé en entier dans une seule session de conversation.\nL'invention du préfixe aléatoire sur les lignes QWERTY est originale et appartient à Pierre-Henri Giraud.",
+  },
+  es: {
+    hero_sub:    "Un sistema de cifrado original basado en las líneas del teclado QWERTY.\nMensajes secretos, chat en tiempo real, aplicación móvil.",
+    hero_btn:    "Abrir la aplicación →",
+    inv_title:   "✦ La invención original",
+    inv_h2:      "El principio del prefijo aleatorio",
+    inv_p1:      "La idea central es simple y elegante : cada letra se codifica por su <strong style='color:var(--amber)'>posición en su línea del teclado</strong>, precedida de una <strong style='color:var(--blue)'>letra de referencia aleatoria</strong> elegida en esa misma línea.",
+    inv_p2:      "Lo que hace original este sistema : la letra de referencia cambia en cada codificación. La misma letra <strong style='color:var(--green)'>H</strong> puede dar <code style='color:var(--amber)'>A6</code>, <code style='color:var(--amber)'>D6</code>, <code style='color:var(--amber)'>S6</code> o <code style='color:var(--amber)'>K6</code> — siempre diferente. El análisis de frecuencias se vuelve imposible.",
+    inv_p3:      "Una segunda capa de cifrado <strong style='color:var(--pink)'>XOR</strong> con una clave secreta personal transforma el código en hexadecimal opaco. El resultado es ilegible sin conocer la clave.",
+    ex_title:    "Ejemplo — codificar la letra H",
+    line2:       "Línea 2",
+    ex_pos:      "Línea 2, posición 6",
+    ex_possible: "Codificaciones posibles (todas válidas) :",
+    ex_note:     "✦ 10 codificaciones diferentes para la misma letra → análisis de frecuencias imposible",
+    feat_title:  "⬡ Qué hace la aplicación",
+    f1_t:"Doble cifrado",        f1_b:"QWERTY (capa 1) + XOR con clave secreta (capa 2)",
+    f2_t:"Vocales acentuadas",   f2_b:"Línea 4 especial : á é í ó ú ü à è ì ò ù ï",
+    f3_t:"Aplicación móvil",     f3_b:"PWA instalable en Android e iOS como una app real",
+    f4_t:"Chat en tiempo real",  f4_b:"Servidor Node.js + WebSockets para comunicarse en directo",
+    f5_t:"Sin servidor",         f5_b:"Versión JSONBin : sin servidor, solo un archivo HTML",
+    f6_t:"Teclado visual",       f6_b:"Visualización en tiempo real de las teclas usadas",
+    cred_title:  "❤ Créditos",
+    cred_h2:     "Un proyecto nacido de una colaboración",
+    cred_phg:    "Ingeniero informático · Inventor del sistema · Idea original",
+    cred_claude: "Asistente IA · Implementación · Código · Diseño",
+    cred_note:   "Este proyecto fue concebido y desarrollado en una sola sesión de conversación.\nLa invención del prefijo aleatorio sobre las líneas QWERTY es original y pertenece a Pierre-Henri Giraud.",
+  },
+  en: {
+    hero_sub:    "An original encryption system based on the QWERTY keyboard rows.\nSecret messages, real-time chat, mobile application.",
+    hero_btn:    "Open the application →",
+    inv_title:   "✦ The original invention",
+    inv_h2:      "The random prefix principle",
+    inv_p1:      "The core idea is simple and elegant: each letter is encoded by its <strong style='color:var(--amber)'>position in its keyboard row</strong>, preceded by a <strong style='color:var(--blue)'>random reference letter</strong> chosen from that same row.",
+    inv_p2:      "What makes this system original: the reference letter changes with each encoding. The same letter <strong style='color:var(--green)'>H</strong> can produce <code style='color:var(--amber)'>A6</code>, <code style='color:var(--amber)'>D6</code>, <code style='color:var(--amber)'>S6</code> or <code style='color:var(--amber)'>K6</code> — always different. Frequency analysis becomes impossible.",
+    inv_p3:      "A second <strong style='color:var(--pink)'>XOR</strong> encryption layer with a personal secret key then transforms the code into opaque hexadecimal. The result is unreadable without knowing the key.",
+    ex_title:    "Example — encoding the letter H",
+    line2:       "Row 2",
+    ex_pos:      "Row 2, position 6",
+    ex_possible: "Possible encodings (all valid):",
+    ex_note:     "✦ 10 different encodings for the same letter → frequency analysis impossible",
+    feat_title:  "⬡ What the application does",
+    f1_t:"Double encryption",    f1_b:"QWERTY (layer 1) + XOR with secret key (layer 2)",
+    f2_t:"Accented vowels",      f2_b:"Special row 4: á é í ó ú ü à è ì ò ù ï",
+    f3_t:"Mobile application",   f3_b:"PWA installable on Android and iOS as a real app",
+    f4_t:"Real-time chat",       f4_b:"Node.js server + WebSockets for live communication",
+    f5_t:"Serverless",           f5_b:"JSONBin version: no server, just one HTML file",
+    f6_t:"Visual keyboard",      f6_b:"Real-time visualization of keys being used",
+    cred_title:  "❤ Credits",
+    cred_h2:     "A project born from a collaboration",
+    cred_phg:    "Computer engineer · System inventor · Original idea",
+    cred_claude: "AI assistant · Implementation · Code · Design",
+    cred_note:   "This project was conceived and developed entirely in a single conversation session.\nThe random prefix invention on QWERTY rows is original and belongs to Pierre-Henri Giraud.",
+  },
+  ru: {
+    hero_sub:    "Оригинальная система шифрования на основе строк клавиатуры QWERTY.\nСекретные сообщения, чат в реальном времени, мобильное приложение.",
+    hero_btn:    "Открыть приложение →",
+    inv_title:   "✦ Оригинальное изобретение",
+    inv_h2:      "Принцип случайного префикса",
+    inv_p1:      "Основная идея проста и элегантна: каждая буква кодируется своей <strong style='color:var(--amber)'>позицией в строке клавиатуры</strong>, которой предшествует <strong style='color:var(--blue)'>случайная опорная буква</strong> из той же строки.",
+    inv_p2:      "Что делает систему оригинальной: опорная буква меняется при каждом шифровании. Одна и та же буква <strong style='color:var(--green)'>H</strong> может дать <code style='color:var(--amber)'>A6</code>, <code style='color:var(--amber)'>D6</code>, <code style='color:var(--amber)'>S6</code> или <code style='color:var(--amber)'>K6</code> — всегда по-разному. Частотный анализ становится невозможным.",
+    inv_p3:      "Второй слой шифрования <strong style='color:var(--pink)'>XOR</strong> с личным секретным ключом превращает код в непрозрачный шестнадцатеричный текст. Результат нечитаем без знания ключа.",
+    ex_title:    "Пример — кодирование буквы H",
+    line2:       "Строка 2",
+    ex_pos:      "Строка 2, позиция 6",
+    ex_possible: "Возможные кодировки (все допустимы):",
+    ex_note:     "✦ 10 различных кодировок одной буквы → частотный анализ невозможен",
+    feat_title:  "⬡ Что делает приложение",
+    f1_t:"Двойное шифрование",   f1_b:"QWERTY (слой 1) + XOR с секретным ключом (слой 2)",
+    f2_t:"Акцентированные гласные", f2_b:"Специальная строка 4: á é í ó ú ü à è ì ò ù ï",
+    f3_t:"Мобильное приложение", f3_b:"PWA, устанавливаемое на Android и iOS как настоящее приложение",
+    f4_t:"Чат в реальном времени", f4_b:"Сервер Node.js + WebSockets для прямого общения",
+    f5_t:"Без сервера",          f5_b:"Версия JSONBin: без сервера, только HTML-файл",
+    f6_t:"Визуальная клавиатура", f6_b:"Визуализация используемых клавиш в реальном времени",
+    cred_title:  "❤ Авторы",
+    cred_h2:     "Проект, рождённый из сотрудничества",
+    cred_phg:    "Инженер-программист · Изобретатель системы · Оригинальная идея",
+    cred_claude: "ИИ-ассистент · Реализация · Код · Дизайн",
+    cred_note:   "Этот проект был задуман и разработан целиком в ходе одной беседы.\nИзобретение случайного префикса на строках QWERTY оригинально и принадлежит Пьеру-Анри Жиро.",
+  }
+};
+
+/* Langue active */
+let currentLang = 'fr';
+
+/* Appliquer une langue */
+function setLang(lang) {
+  currentLang = lang;
+  const t = T[lang];
+
+  /* Mettre à jour tous les éléments data-i18n */
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.innerHTML = t[key].replace(/\n/g, '<br>');
+  });
+
+  /* Mettre à jour le select */
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = lang;
+
+  /* Mettre à jour lang= sur <html> */
+  document.documentElement.lang = lang;
+
+  /* Sauvegarder le choix */
+  localStorage.setItem('qw_lang', lang);
+}
+
+/* Détecter la langue au démarrage */
+window.addEventListener('load', () => {
+  const saved    = localStorage.getItem('qw_lang');
+  const browser  = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+  const detected = saved || (['fr','es','en'].includes(browser) ? browser : 'fr');
+  setLang(detected);
+});
+</script>
 </body>
 </html>

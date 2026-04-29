@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f0f12"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+  <meta name="apple-mobile-web-app-title" content="QWERTY Chat"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon.png"/>
   <title>QWERTY Cifrador / Descifrador</title>
 
   <!--
@@ -42,6 +48,24 @@
       --mono:'Space Mono',monospace;
       --sans:'DM Sans',sans-serif;
     }
+
+    /* ============================================================
+       SELECTOR DE IDIOMA — lista desplegable con banderas
+    ============================================================ */
+    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100}
+    .lang-select{
+      font-family:var(--sans);font-size:14px;padding:5px 10px 5px 8px;
+      border-radius:8px;border:1px solid var(--border);
+      background:var(--surface2);color:var(--text-main);
+      cursor:pointer;outline:none;transition:border-color .2s;
+      appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b80'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 8px center;
+      padding-right:26px;
+    }
+    .lang-select:hover{border-color:var(--accent-amber)}
+    .lang-select:focus{border-color:var(--accent-amber)}
+    .lang-select option{background:#1a1a22;color:var(--text-main);font-size:14px}
 
     /* ============================================================
        RESET MÍNIMO + BASE
@@ -226,12 +250,22 @@
 </head>
 <body>
 
+<!-- SELECTOR DE IDIOMA -->
+<div class="lang-select-wrap">
+  <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
+    <option value="fr">🇫🇷 Français</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="ru">🇷🇺 Русский</option>
+  </select>
+</div>
+
 <!-- ================================================================
      CABECERA
 ================================================================ -->
 <header>
   <h1><span class="blue">CIFRA</span> · <span class="green">DESCIFRA</span></h1>
-  <p>Codificador / Decodificador basado en líneas del teclado QWERTY español</p>
+  <p data-i18n="subtitle"></p>
   <div class="badge-row">
     <span class="badge badge-pink">✦ vocales acentuadas europeas</span>
     <span class="badge badge-amber">🔑 clave secreta XOR</span>
@@ -244,7 +278,7 @@
      SOLO al codificador. El decodificador tiene su propio campo.
 ================================================================ -->
 <div class="key-bar">
-  <div class="key-bar-title">🔑 Clave Secreta — Codificador</div>
+  <div class="key-bar-title" data-i18n="key_bar_title"></div>
   <div class="key-bar-inner">
     <div class="key-input-wrap">
       <input type="password" id="enc-secret-key"
@@ -275,13 +309,13 @@
        Flujo: texto → cifrado QWERTY (capa 1) → XOR hex (capa 2 si hay clave)
   ============================================================ -->
   <div class="card encode">
-    <div class="card-title">⬡ Codificador
+    <div class="card-title" data-i18n="enc_title_prefix">⬡ Codificador
       <!-- Tag que indica si la clave XOR está activa -->
       <span class="mode-tag off" id="enc-mode-tag">sin clave</span>
     </div>
 
     <div>
-      <label for="enc-input">Texto original</label>
+      <label for="enc-input" data-i18n="lbl_original"></label>
       <!-- oninput: re-codifica en tiempo real con cada pulsación -->
       <textarea id="enc-input" placeholder="Escribe el texto a cifrar…" oninput="onEncodeInput()"></textarea>
     </div>
@@ -289,15 +323,15 @@
     <div class="btn-row">
       <!-- "Recodificar": genera nuevas letras de referencia aleatorias
            para el mismo texto (el código cambia pero sigue siendo válido) -->
-      <button class="btn-primary-blue" onclick="encode()">↺ Recodificar</button>
-      <button onclick="clearEncode()">Limpiar</button>
+      <button class="btn-primary-blue" onclick="encode()"data-i18n="btn_recode">↺</button>
+      <button onclick="clearEncode()" data-i18n="btn_clear"></button>
     </div>
 
     <!-- Salida con botón Copiar -->
     <div class="output-row">
       <div class="output-header">
-        <label style="margin:0">Código resultante</label>
-        <button class="btn-copy" id="btn-copy" onclick="copyCode()">⎘ Copiar</button>
+        <label style="margin:0" data-i18n="lbl_result"></label>
+        <button class="btn-copy" id="btn-copy" onclick="copyCode()"data-i18n="btn_copy">⎘</button>
       </div>
       <!-- Clase "locked" (ámbar) cuando el resultado es hex XOR -->
       <div class="output-box" id="enc-output"></div>
@@ -305,11 +339,11 @@
 
     <!-- Muestra el código QWERTY de capa 1 antes de aplicar XOR
          Solo visible cuando hay clave activa -->
-    <div class="xor-info" id="enc-xor-info">Capa 1 QWERTY: <span id="enc-qwerty-preview"></span></div>
+    <div class="xor-info" id="enc-xor-info"><span data-i18n="xor_layer1"></span> <span id="enc-qwerty-preview"></span></div>
 
     <!-- Fichas de detalle: un chip por cada letra codificada -->
     <div>
-      <label>Detalle de pares (capa QWERTY)</label>
+      <label data-i18n="lbl_pairs"></label>
       <div class="pairs" id="enc-pairs"></div>
     </div>
   </div>
@@ -322,12 +356,12 @@
        resultados parciales incorrectos.
   ============================================================ -->
   <div class="card decode">
-    <div class="card-title">⬡ Decodificador
+    <div class="card-title" data-i18n="dec_title_prefix">⬡ Decodificador
       <span class="mode-tag off" id="dec-mode-tag">sin clave</span>
     </div>
 
     <div>
-      <label for="dec-input">Código cifrado</label>
+      <label for="dec-input" data-i18n="lbl_cipher"></label>
       <!-- oninput: sin clave → decode tiempo real; con clave → pide pulsar botón -->
       <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
     </div>
@@ -335,7 +369,7 @@
     <!-- Bloque de clave propio del decodificador
          Independiente del codificador — el receptor introduce SU clave aquí -->
     <div class="inline-key-wrap">
-      <div class="inline-key-label">🔑 Clave secreta</div>
+      <div class="inline-key-label" data-i18n="lbl_secret_key"></div>
       <div class="inline-key-row">
         <div class="inline-key-input-wrap">
           <input type="password" id="dec-secret-key"
@@ -349,21 +383,21 @@
         <div class="key-status waiting" id="dec-key-status">sin clave</div>
       </div>
       <!-- Botón explícito: único punto de disparo del descifrado con clave -->
-      <button class="btn-decode" onclick="decode()">⬡ Descifrar</button>
+      <button class="btn-decode" onclick="decode()" data-i18n="btn_decode"></button>
     </div>
 
     <!-- Resultado descifrado: clase "garbage" (rojo) si la clave es incorrecta -->
     <div>
-      <label>Texto descifrado</label>
+      <label data-i18n="lbl_decrypted"></label>
       <div class="output-box" id="dec-output"></div>
     </div>
 
     <!-- Muestra el código QWERTY intermedio tras revertir el XOR
          Solo visible cuando la clave es correcta -->
-    <div class="xor-info" id="dec-xor-info">Tras XOR inverso: <span id="dec-qwerty-preview"></span></div>
+    <div class="xor-info" id="dec-xor-info"><span data-i18n="xor_inverse"></span> <span id="dec-qwerty-preview"></span></div>
 
     <div>
-      <label>Detalle de pares (capa QWERTY)</label>
+      <label data-i18n="lbl_pairs"></label>
       <div class="pairs" id="dec-pairs"></div>
     </div>
   </div>
@@ -376,17 +410,17 @@
      Resalta en tiempo real las teclas usadas en la última operación.
 ================================================================ -->
 <div class="keyboard-section">
-  <h2>Teclado QWERTY Español — referencia visual</h2>
+  <h2 data-i18n="kb_title"></h2>
   <div id="kb-row0" class="kb-row"></div><!-- Línea 0: cifras 1-0 -->
   <div id="kb-row1" class="kb-row"></div><!-- Línea 1: Q W E R T Y U I O P -->
   <div id="kb-row2" class="kb-row"></div><!-- Línea 2: A S D F G H J K L Ñ -->
   <div id="kb-row3" class="kb-row"></div><!-- Línea 3: Z X C V B N M -->
   <div id="kb-row4" class="kb-row accent-row"></div><!-- Línea 4: vocales acentuadas -->
   <div class="kb-legend">
-    <span><span class="dot" style="background:#1a3a5c;border:1px solid #4a9eff"></span> Letra de referencia</span>
-    <span><span class="dot" style="background:#0f3326;border:1px solid #3ecf8e"></span> Letra destino</span>
-    <span><span class="dot" style="background:#2a2a10;border:1px solid #f5a623"></span> Coinciden</span>
-    <span><span class="dot" style="background:#2a1a35;border:1px solid #e06cff"></span> Vocal acentuada</span>
+    <span><span class="dot" style="background:#1a3a5c;border:1px solid #4a9eff"></span> <span data-i18n="leg_ref"></span></span>
+    <span><span class="dot" style="background:#0f3326;border:1px solid #3ecf8e"></span> <span data-i18n="leg_dst"></span></span>
+    <span><span class="dot" style="background:#2a2a10;border:1px solid #f5a623"></span> <span data-i18n="leg_both"></span></span>
+    <span><span class="dot" style="background:#2a1a35;border:1px solid #e06cff"></span> <span data-i18n="leg_acc"></span></span>
   </div>
 </div>
 
@@ -924,6 +958,251 @@
   ============================================================== */
   renderKeyboard([]);
 
+</script>
+<!-- ================================================================
+     INTERNATIONALISATION — FR / ES / EN
+     Détection automatique via navigator.language
+     Sauvegarde du choix dans localStorage
+================================================================ -->
+<script>
+const TI = {
+  fr: {
+    subtitle:      "Chiffreur / Déchiffreur basé sur les lignes du clavier QWERTY espagnol",
+    key_bar_title: "🔑 Clé Secrète — Chiffreur",
+    enc_title_prefix: "⬡ Chiffreur",
+    lbl_original:  "Texte original",
+    enc_placeholder: "Écris le texte à chiffrer…",
+    btn_recode:    "↺ Rechiffrer",
+    btn_clear:     "Effacer",
+    lbl_result:    "Code résultant",
+    btn_copy:      "⎘ Copier",
+    xor_layer1:    "Couche 1 QWERTY :",
+    lbl_pairs:     "Détail des paires (couche QWERTY)",
+    dec_title_prefix: "⬡ Déchiffreur",
+    lbl_cipher:    "Code chiffré",
+    dec_placeholder: "Colle ici le code à déchiffrer…",
+    lbl_secret_key:"🔑 Clé secrète",
+    dec_key_placeholder: "Entre la clé pour déchiffrer…",
+    btn_decode:    "⬡ Déchiffrer",
+    lbl_decrypted: "Texte déchiffré",
+    xor_inverse:   "Après XOR inverse :",
+    kb_title:      "Clavier QWERTY Espagnol — référence visuelle",
+    leg_ref:       "Lettre de référence",
+    leg_dst:       "Lettre destination",
+    leg_both:      "Coïncident",
+    leg_acc:       "Voyelle accentuée",
+    no_key:        "sans clé",
+    with_key:      "🔑 avec clé",
+    press_decode:  "↵ appuie sur Déchiffrer",
+    key_ok:        "✓ clé correcte",
+    key_wrong:     "✗ clé incorrecte",
+    key_applied:   "✓ clé appliquée",
+  },
+  es: {
+    subtitle:      "Codificador / Decodificador basado en líneas del teclado QWERTY español",
+    key_bar_title: "🔑 Clave Secreta — Codificador",
+    enc_title_prefix: "⬡ Codificador",
+    lbl_original:  "Texto original",
+    enc_placeholder: "Escribe el texto a cifrar…",
+    btn_recode:    "↺ Recodificar",
+    btn_clear:     "Limpiar",
+    lbl_result:    "Código resultante",
+    btn_copy:      "⎘ Copiar",
+    xor_layer1:    "Capa 1 QWERTY:",
+    lbl_pairs:     "Detalle de pares (capa QWERTY)",
+    dec_title_prefix: "⬡ Decodificador",
+    lbl_cipher:    "Código cifrado",
+    dec_placeholder: "Pega aquí el código a descifrar…",
+    lbl_secret_key:"🔑 Clave secreta",
+    dec_key_placeholder: "Introduce la clave para descifrar…",
+    btn_decode:    "⬡ Descifrar",
+    lbl_decrypted: "Texto descifrado",
+    xor_inverse:   "Tras XOR inverso:",
+    kb_title:      "Teclado QWERTY Español — referencia visual",
+    leg_ref:       "Letra de referencia",
+    leg_dst:       "Letra destino",
+    leg_both:      "Coinciden",
+    leg_acc:       "Vocal acentuada",
+    no_key:        "sin clave",
+    with_key:      "🔑 con clave",
+    press_decode:  "↵ pulsa Descifrar",
+    key_ok:        "✓ clave correcta",
+    key_wrong:     "✗ clave incorrecta",
+    key_applied:   "✓ clave aplicada",
+  },
+  en: {
+    subtitle:      "Encoder / Decoder based on Spanish QWERTY keyboard rows",
+    key_bar_title: "🔑 Secret Key — Encoder",
+    enc_title_prefix: "⬡ Encoder",
+    lbl_original:  "Original text",
+    enc_placeholder: "Type the text to encrypt…",
+    btn_recode:    "↺ Re-encode",
+    btn_clear:     "Clear",
+    lbl_result:    "Resulting code",
+    btn_copy:      "⎘ Copy",
+    xor_layer1:    "Layer 1 QWERTY:",
+    lbl_pairs:     "Pair details (QWERTY layer)",
+    dec_title_prefix: "⬡ Decoder",
+    lbl_cipher:    "Encrypted code",
+    dec_placeholder: "Paste the code to decrypt here…",
+    lbl_secret_key:"🔑 Secret key",
+    dec_key_placeholder: "Enter the key to decrypt…",
+    btn_decode:    "⬡ Decrypt",
+    lbl_decrypted: "Decrypted text",
+    xor_inverse:   "After inverse XOR:",
+    kb_title:      "Spanish QWERTY Keyboard — visual reference",
+    leg_ref:       "Reference letter",
+    leg_dst:       "Destination letter",
+    leg_both:      "Match",
+    leg_acc:       "Accented vowel",
+    no_key:        "no key",
+    with_key:      "🔑 with key",
+    press_decode:  "↵ press Decrypt",
+    key_ok:        "✓ correct key",
+    key_wrong:     "✗ wrong key",
+    key_applied:   "✓ key applied",
+  },
+  ru: {
+    subtitle:      "Шифратор / Дешифратор на основе строк клавиатуры QWERTY",
+    key_bar_title: "🔑 Секретный ключ — Шифратор",
+    enc_title_prefix: "⬡ Шифратор",
+    lbl_original:  "Исходный текст",
+    enc_placeholder: "Введите текст для шифрования…",
+    btn_recode:    "↺ Перешифровать",
+    btn_clear:     "Очистить",
+    lbl_result:    "Зашифрованный код",
+    btn_copy:      "⎘ Копировать",
+    xor_layer1:    "Слой 1 QWERTY:",
+    lbl_pairs:     "Детали пар (слой QWERTY)",
+    dec_title_prefix: "⬡ Дешифратор",
+    lbl_cipher:    "Зашифрованный код",
+    dec_placeholder: "Вставьте код для расшифровки…",
+    lbl_secret_key:"🔑 Секретный ключ",
+    dec_key_placeholder: "Введите ключ для расшифровки…",
+    btn_decode:    "⬡ Расшифровать",
+    lbl_decrypted: "Расшифрованный текст",
+    xor_inverse:   "После обратного XOR:",
+    kb_title:      "Испанская клавиатура QWERTY — визуальная справка",
+    leg_ref:       "Опорная буква",
+    leg_dst:       "Целевая буква",
+    leg_both:      "Совпадают",
+    leg_acc:       "Акцентированная гласная",
+    no_key:        "без ключа",
+    with_key:      "🔑 с ключом",
+    press_decode:  "↵ нажмите Расшифровать",
+    key_ok:        "✓ ключ верный",
+    key_wrong:     "✗ ключ неверный",
+    key_applied:   "✓ ключ применён",
+  }
+};
+
+let currentLang = 'es';
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = TI[lang];
+
+  /* Mettre à jour les éléments data-i18n */
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+
+  /* Mettre à jour les placeholders */
+  const encIn  = document.getElementById('enc-input');
+  const decIn  = document.getElementById('dec-input');
+  const decKey = document.getElementById('dec-secret-key');
+  const encKey = document.getElementById('enc-secret-key');
+  if (encIn)  encIn.placeholder  = t.enc_placeholder;
+  if (decIn)  decIn.placeholder  = t.dec_placeholder;
+  if (decKey) decKey.placeholder = t.dec_key_placeholder;
+  if (encKey) encKey.placeholder = t.enc_placeholder;
+
+  /* Mettre à jour le select */
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = lang;
+
+  /* Mettre à jour les textes dynamiques si déjà affichés */
+  const encHint = document.getElementById('enc-key-hint');
+  const encTag  = document.getElementById('enc-mode-tag');
+  const decTag  = document.getElementById('dec-mode-tag');
+  const decSt   = document.getElementById('dec-key-status');
+  const encKey2 = document.getElementById('enc-secret-key');
+
+  if (encHint && !encKey2?.value) encHint.textContent = t.no_key;
+  if (encTag  && encTag.classList.contains('off'))  encTag.textContent  = t.no_key;
+  if (encTag  && encTag.classList.contains('on'))   encTag.textContent  = t.with_key;
+  if (decTag  && decTag.classList.contains('off'))  decTag.textContent  = t.no_key;
+  if (decTag  && decTag.classList.contains('on'))   decTag.textContent  = t.with_key;
+  if (decSt   && decSt.textContent.includes('clave') || decSt?.textContent.includes('key') || decSt?.textContent.includes('clé')) {
+    const decKeyVal = document.getElementById('dec-secret-key')?.value;
+    if (!decKeyVal) decSt.textContent = t.no_key;
+  }
+
+  document.documentElement.lang = lang;
+  localStorage.setItem('qw_lang', lang);
+}
+
+/* Patcher les fonctions dynamiques pour utiliser TI */
+const _origOnEncKeyChange = typeof onEncKeyChange !== 'undefined' ? onEncKeyChange : null;
+const _origOnDecKeyChange = typeof onDecKeyChange !== 'undefined' ? onDecKeyChange : null;
+
+/* Surcharge de onEncKeyChange pour textes traduits */
+window.addEventListener('load', () => {
+  /* Détecter la langue */
+  const saved    = localStorage.getItem('qw_lang');
+  const browser  = (navigator.language || 'es').slice(0,2).toLowerCase();
+  const detected = saved || (['fr','es','en'].includes(browser) ? browser : 'es');
+  setLang(detected);
+
+  /* Patcher onEncKeyChange */
+  const origEnc = window.onEncKeyChange;
+  window.onEncKeyChange = function() {
+    const key = document.getElementById('enc-secret-key').value;
+    const t   = TI[currentLang];
+    document.getElementById('enc-key-hint').textContent = key ? key.length + ' car.' : t.no_key;
+    updateStrength(key);
+    const tag = document.getElementById('enc-mode-tag');
+    tag.textContent = key ? t.with_key : t.no_key;
+    tag.className   = key ? 'mode-tag on' : 'mode-tag off';
+    if (document.getElementById('enc-input').value) encode();
+  };
+
+  /* Patcher onDecKeyChange */
+  window.onDecKeyChange = function() {
+    const key    = document.getElementById('dec-secret-key').value;
+    const t      = TI[currentLang];
+    const status = document.getElementById('dec-key-status');
+    const tag    = document.getElementById('dec-mode-tag');
+    status.textContent = key ? t.press_decode : t.no_key;
+    status.className   = key ? 'key-status waiting' : 'key-status';
+    tag.textContent    = key ? t.with_key : t.no_key;
+    tag.className      = key ? 'mode-tag on' : 'mode-tag off';
+    document.getElementById('dec-output').textContent = '';
+    document.getElementById('dec-output').className   = 'output-box';
+    document.getElementById('dec-pairs').innerHTML    = '';
+    document.getElementById('dec-xor-info').classList.remove('visible');
+    renderKeyboard([]);
+  };
+
+  /* Patcher decode pour textes de statut traduits */
+  const origDecode = window.decode;
+  window.decode = function() {
+    origDecode();
+    /* Corriger le statut après decode */
+    const t      = TI[currentLang];
+    const statusEl = document.getElementById('dec-key-status');
+    if (statusEl) {
+      if (statusEl.textContent.includes('correcta') || statusEl.textContent.includes('correcte') || statusEl.textContent.includes('correct')) {
+        statusEl.textContent = t.key_ok;
+      } else if (statusEl.textContent.includes('incorrecta') || statusEl.textContent.includes('incorrecte') || statusEl.textContent.includes('wrong')) {
+        statusEl.textContent = t.key_wrong;
+      } else if (statusEl.textContent.includes('aplicada') || statusEl.textContent.includes('appliquée') || statusEl.textContent.includes('applied')) {
+        statusEl.textContent = t.key_applied;
+      }
+    }
+  };
+});
 </script>
 </body>
 </html>
