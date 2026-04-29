@@ -167,6 +167,29 @@
     .btn-copy.copied{background:#0f2a1a;border-color:var(--accent-green);color:var(--accent-green)}
 
     /* ============================================================
+       BARRA DE COMPARTIR
+       Botones para WhatsApp, Telegram, Signal, Email, Copiar
+    ============================================================ */
+    .share-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .share-btn{
+      display:flex;align-items:center;gap:5px;
+      font-family:var(--mono);font-size:11px;padding:5px 10px;
+      border-radius:6px;border:1px solid var(--border);
+      background:var(--surface2);color:var(--text-muted);
+      cursor:pointer;transition:all .15s;text-decoration:none;
+      white-space:nowrap;letter-spacing:.3px;
+    }
+    .share-btn:hover{opacity:.85;transform:translateY(-1px)}
+    .share-btn.wa   {border-color:#25d366;color:#25d366}
+    .share-btn.tg   {border-color:#2aabee;color:#2aabee}
+    .share-btn.sg   {border-color:#3a76f0;color:#3a76f0}
+    .share-btn.ml   {border-color:var(--accent-amber);color:var(--accent-amber)}
+    .share-btn.cp   {border-color:var(--border);color:var(--text-muted)}
+    .share-btn.cp.copied{border-color:var(--accent-green);color:var(--accent-green);background:#0f2a1a}
+    .share-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;
+                 color:var(--text-muted);margin-bottom:4px}
+
+    /* ============================================================
        BLOQUE DE CLAVE DEL DECODIFICADOR (inline)
        Panel ámbar integrado dentro de la tarjeta decode.
        Contiene: label + input password + ojo + estado + botón Descifrar.
@@ -338,10 +361,21 @@
     <div class="output-row">
       <div class="output-header">
         <label style="margin:0" data-i18n="lbl_result"></label>
-        <button class="btn-copy" id="btn-copy" onclick="copyCode()"data-i18n="btn_copy">⎘</button>
+        <button class="btn-copy" id="btn-copy" onclick="copyCode()" data-i18n="btn_copy">⎘</button>
       </div>
-      <!-- Clase "locked" (ámbar) cuando el resultado es hex XOR -->
       <div class="output-box" id="enc-output"></div>
+    </div>
+
+    <!-- Barra de compartir — codificador -->
+    <div>
+      <div class="share-label" data-i18n="lbl_share"></div>
+      <div class="share-bar">
+        <button class="share-btn wa" onclick="shareCode('wa','enc')" title="WhatsApp">📗 WhatsApp</button>
+        <button class="share-btn tg" onclick="shareCode('tg','enc')" title="Telegram">✈️ Telegram</button>
+        <button class="share-btn sg" onclick="shareCode('sg','enc')" title="Signal">🔵 Signal</button>
+        <button class="share-btn ml" onclick="shareCode('ml','enc')" title="Email">📧 Email</button>
+        <button class="share-btn cp" id="share-cp-enc" onclick="shareCode('cp','enc')" data-i18n="btn_copy_share">⎘ Copier</button>
+      </div>
     </div>
 
     <!-- Muestra el código QWERTY de capa 1 antes de aplicar XOR
@@ -393,10 +427,22 @@
       <button class="btn-decode" onclick="decode()" data-i18n="btn_decode"></button>
     </div>
 
-    <!-- Resultado descifrado: clase "garbage" (rojo) si la clave es incorrecta -->
+    <!-- Resultado descifrado -->
     <div>
       <label data-i18n="lbl_decrypted"></label>
       <div class="output-box" id="dec-output"></div>
+    </div>
+
+    <!-- Barra de compartir — decodificador -->
+    <div>
+      <div class="share-label" data-i18n="lbl_share"></div>
+      <div class="share-bar">
+        <button class="share-btn wa" onclick="shareCode('wa','dec')" title="WhatsApp">📗 WhatsApp</button>
+        <button class="share-btn tg" onclick="shareCode('tg','dec')" title="Telegram">✈️ Telegram</button>
+        <button class="share-btn sg" onclick="shareCode('sg','dec')" title="Signal">🔵 Signal</button>
+        <button class="share-btn ml" onclick="shareCode('ml','dec')" title="Email">📧 Email</button>
+        <button class="share-btn cp" id="share-cp-dec" onclick="shareCode('cp','dec')" data-i18n="btn_copy_share">⎘ Copier</button>
+      </div>
     </div>
 
     <!-- Muestra el código QWERTY intermedio tras revertir el XOR
@@ -686,6 +732,72 @@
       console.warn('Copy failed:', e);
     }
     document.body.removeChild(ta);
+  }
+
+  /* ==============================================================
+     PARTAGER — shareCode(app, side)
+     app  : 'wa' | 'tg' | 'sg' | 'ml' | 'cp'
+     side : 'enc' (code chiffré) | 'dec' (texte déchiffré)
+     Chaque app utilise son schéma d'URL universel.
+     Signal n'a pas d'URL universelle — on copie + message.
+  ============================================================== */
+  function shareCode(app, side) {
+    const text = document.getElementById(side === 'enc' ? 'enc-output' : 'dec-output').textContent.trim();
+    if (!text) return;
+
+    const t    = TI[currentLang] || TI['fr'];
+    const msg  = encodeURIComponent(text);
+
+    switch(app) {
+      case 'wa':
+        /* WhatsApp universal link — fonctionne mobile et desktop */
+        window.open('https://wa.me/?text=' + msg, '_blank');
+        break;
+
+      case 'tg':
+        /* Telegram universal share link */
+        window.open('https://t.me/share/url?url=%20&text=' + msg, '_blank');
+        break;
+
+      case 'sg':
+        /* Signal n'a pas de deep link universel — on copie + alerte */
+        fallbackCopy(text, () => {
+          const btn = document.getElementById('share-cp-' + side);
+          btn.textContent = '✓ ' + (t.copied || 'Copié !');
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = t.btn_copy_share || '⎘ Copier';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+        alert((t.signal_hint || 'Code copié ! Colle-le dans Signal.'));
+        break;
+
+      case 'ml':
+        /* Email — ouvre le client mail avec le code dans le corps */
+        window.location.href = 'mailto:?subject=' +
+          encodeURIComponent('QWERTY Cipher') + '&body=' + msg;
+        break;
+
+      case 'cp':
+        /* Copier dans le presse-papiers */
+        const btnId = 'share-cp-' + side;
+        const btn   = document.getElementById(btnId);
+        const done  = () => {
+          btn.textContent = '✓ ' + (t.copied || 'Copié !');
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = t.btn_copy_share || '⎘ Copier';
+            btn.classList.remove('copied');
+          }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+        } else {
+          fallbackCopy(text, done);
+        }
+        break;
+    }
   }
 
   /* ==============================================================
@@ -1005,6 +1117,10 @@ const TI = {
     key_wrong:     "✗ clé incorrecte",
     key_applied:   "✓ clé appliquée",
     btn_about:     "ℹ À propos",
+    lbl_share:     "Partager",
+    btn_copy_share:"⎘ Copier",
+    copied:        "Copié !",
+    signal_hint:   "Code copié ! Colle-le dans Signal.",
   },
   es: {
     subtitle:      "Codificador / Decodificador basado en líneas del teclado QWERTY español",
@@ -1038,6 +1154,10 @@ const TI = {
     key_wrong:     "✗ clave incorrecta",
     key_applied:   "✓ clave aplicada",
     btn_about:     "ℹ Acerca de",
+    lbl_share:     "Compartir",
+    btn_copy_share:"⎘ Copiar",
+    copied:        "¡Copiado!",
+    signal_hint:   "¡Código copiado! Pégalo en Signal.",
   },
   en: {
     subtitle:      "Encoder / Decoder based on Spanish QWERTY keyboard rows",
@@ -1071,6 +1191,10 @@ const TI = {
     key_wrong:     "✗ wrong key",
     key_applied:   "✓ key applied",
     btn_about:     "ℹ About",
+    lbl_share:     "Share",
+    btn_copy_share:"⎘ Copy",
+    copied:        "Copied!",
+    signal_hint:   "Code copied! Paste it in Signal.",
   },
   ru: {
     subtitle:      "Шифратор / Дешифратор на основе строк клавиатуры QWERTY",
@@ -1104,6 +1228,10 @@ const TI = {
     key_wrong:     "✗ ключ неверный",
     key_applied:   "✓ ключ применён",
     btn_about:     "ℹ О проекте",
+    lbl_share:     "Поделиться",
+    btn_copy_share:"⎘ Копировать",
+    copied:        "Скопировано!",
+    signal_hint:   "Код скопирован! Вставьте в Signal.",
   }
 };
 
