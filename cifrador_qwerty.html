@@ -52,7 +52,13 @@
     /* ============================================================
        SELECTOR DE IDIOMA — lista desplegable con banderas
     ============================================================ */
-    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100}
+    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100;display:flex;gap:8px;align-items:center}
+    /* Bouton À propos */
+    .btn-about{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:8px;
+               border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);
+               cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block;
+               letter-spacing:.5px}
+    .btn-about:hover{border-color:var(--accent-green);color:var(--accent-green)}
     .lang-select{
       font-family:var(--sans);font-size:14px;padding:5px 10px 5px 8px;
       border-radius:8px;border:1px solid var(--border);
@@ -250,8 +256,9 @@
 </head>
 <body>
 
-<!-- SELECTOR DE IDIOMA -->
+<!-- SELECTOR DE IDIOMA + BOUTON À PROPOS -->
 <div class="lang-select-wrap">
+  <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
   <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
     <option value="fr">🇫🇷 Français</option>
     <option value="es">🇪🇸 Español</option>
@@ -997,6 +1004,7 @@ const TI = {
     key_ok:        "✓ clé correcte",
     key_wrong:     "✗ clé incorrecte",
     key_applied:   "✓ clé appliquée",
+    btn_about:     "ℹ À propos",
   },
   es: {
     subtitle:      "Codificador / Decodificador basado en líneas del teclado QWERTY español",
@@ -1029,6 +1037,7 @@ const TI = {
     key_ok:        "✓ clave correcta",
     key_wrong:     "✗ clave incorrecta",
     key_applied:   "✓ clave aplicada",
+    btn_about:     "ℹ Acerca de",
   },
   en: {
     subtitle:      "Encoder / Decoder based on Spanish QWERTY keyboard rows",
@@ -1061,6 +1070,7 @@ const TI = {
     key_ok:        "✓ correct key",
     key_wrong:     "✗ wrong key",
     key_applied:   "✓ key applied",
+    btn_about:     "ℹ About",
   },
   ru: {
     subtitle:      "Шифратор / Дешифратор на основе строк клавиатуры QWERTY",
@@ -1093,6 +1103,7 @@ const TI = {
     key_ok:        "✓ ключ верный",
     key_wrong:     "✗ ключ неверный",
     key_applied:   "✓ ключ применён",
+    btn_about:     "ℹ О проекте",
   }
 };
 
