@@ -1,0 +1,36 @@
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+Copyright (C) 2026 Pierre-Henri Giraud <ph.giraud@proton.me>
+
+QWERTY Cipher — Système de chiffrement basé sur les lignes du clavier QWERTY
+Développé en collaboration avec Claude (Anthropic)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+-------------------------------------------------------------------------------
+
+INVENTION ORIGINALE
+-------------------
+Le principe du "préfixe aléatoire sur les lignes du clavier QWERTY" est une
+invention originale de Pierre-Henri Giraud (2026).
+
+Principe : chaque lettre est codée par sa position dans sa ligne du clavier,
+précédée d'une lettre de référence aléatoire choisie dans cette même ligne.
+Ce mécanisme rend l'analyse fréquentielle impossible sans la clé secrète.
+
+-------------------------------------------------------------------------------
+
+© 2026 Pierre-Henri Giraud — Tous droits réservés sur l'invention originale.
+Distribué sous licence GNU GPL v3.
