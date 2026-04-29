@@ -234,26 +234,51 @@
     <h2 data-i18n="cred_h2"></h2>
     <div class="credit-row">
       <div class="credit-person">
-        <div class="avatar human">
-          <!-- Mini icône 4 touches : P H G 🔒 -->
-          <svg width="52" height="52" viewBox="0 0 52 52">
-            <rect x="2"  y="2"  width="22" height="22" rx="4" fill="#1a1a22" stroke="#4a9eff" stroke-width="1.5"/>
-            <text x="13" y="17" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#4a9eff">P</text>
-            <rect x="28" y="2"  width="22" height="22" rx="4" fill="#1a1a22" stroke="#4a9eff" stroke-width="1.5"/>
-            <text x="39" y="17" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#4a9eff">H</text>
-            <rect x="2"  y="28" width="22" height="22" rx="4" fill="#1a1a22" stroke="#3ecf8e" stroke-width="1.5"/>
-            <text x="13" y="43" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#3ecf8e">G</text>
-            <rect x="28" y="28" width="22" height="22" rx="4" fill="#f5a623" stroke="#f5a623" stroke-width="1"/>
-            <text x="39" y="43" text-anchor="middle" font-size="13">🔒</text>
-          </svg>
-        </div>
+        <!-- Clic sur le logo → ouvre l'email de Pierre-Henri -->
+        <a href="mailto:ph.giraud@proton.me" title="ph.giraud@proton.me"
+           style="text-decoration:none;cursor:pointer">
+          <div class="avatar human">
+            <svg width="52" height="52" viewBox="0 0 52 52">
+              <rect x="2"  y="2"  width="22" height="22" rx="4" fill="#1a1a22" stroke="#4a9eff" stroke-width="1.5"/>
+              <text x="13" y="17" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#4a9eff">P</text>
+              <rect x="28" y="2"  width="22" height="22" rx="4" fill="#1a1a22" stroke="#4a9eff" stroke-width="1.5"/>
+              <text x="39" y="17" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#4a9eff">H</text>
+              <rect x="2"  y="28" width="22" height="22" rx="4" fill="#1a1a22" stroke="#3ecf8e" stroke-width="1.5"/>
+              <text x="13" y="43" text-anchor="middle" font-family="monospace" font-size="11" font-weight="700" fill="#3ecf8e">G</text>
+              <rect x="28" y="28" width="22" height="22" rx="4" fill="#f5a623" stroke="#f5a623" stroke-width="1"/>
+              <text x="39" y="43" text-anchor="middle" font-size="13">🔒</text>
+            </svg>
+          </div>
+        </a>
         <div class="credit-name">Pierre-Henri Giraud</div>
+        <div style="font-size:12px;margin-top:-4px">
+          <a href="mailto:ph.giraud@proton.me"
+             style="color:var(--muted);text-decoration:none;font-family:'Space Mono',monospace;font-size:11px">
+            📧 ph.giraud@proton.me
+          </a>
+        </div>
         <div class="credit-role" data-i18n="cred_phg"></div>
       </div>
+
       <div class="credit-divider">×</div>
+
       <div class="credit-person">
-        <div class="avatar ai">AI</div>
+        <!-- Clic sur le logo → ouvre claude.ai -->
+        <a href="https://claude.ai" target="_blank" title="claude.ai"
+           style="text-decoration:none;cursor:pointer">
+          <div class="avatar ai" style="font-size:26px;transition:transform .2s"
+               onmouseover="this.style.transform='scale(1.1)'"
+               onmouseout="this.style.transform='scale(1)'">
+            ✦
+          </div>
+        </a>
         <div class="credit-name">Claude</div>
+        <div style="font-size:12px;margin-top:-4px">
+          <a href="https://claude.ai" target="_blank"
+             style="color:var(--muted);text-decoration:none;font-family:'Space Mono',monospace;font-size:11px">
+            🌐 claude.ai
+          </a>
+        </div>
         <div class="credit-role" data-i18n="cred_claude"></div>
       </div>
     </div>
