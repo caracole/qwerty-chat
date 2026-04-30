@@ -49,7 +49,24 @@
     .section-title{font-family:'Space Mono',monospace;font-size:13px;
                    letter-spacing:3px;text-transform:uppercase;
                    color:var(--amber);margin-bottom:24px;
-                   padding-bottom:10px;border-bottom:1px solid var(--brd)}
+                   padding-bottom:10px;border-bottom:1px solid var(--brd);
+                   cursor:pointer;display:flex;justify-content:space-between;
+                   align-items:center;user-select:none;transition:color .2s}
+    .section-title:hover{color:var(--blue)}
+    .section-title::after{content:'▾';font-size:16px;transition:transform .3s;display:inline-block}
+    .section-title.collapsed::after{transform:rotate(-90deg)}
+    .section-body{overflow:hidden;transition:max-height .4s ease, opacity .3s ease;
+                  max-height:2000px;opacity:1}
+    .section-body.collapsed{max-height:0;opacity:0}
+
+    /* GUIDE LINK */
+    .guide-link-wrap{text-align:center;margin:8px 0 32px}
+    .guide-link{display:inline-flex;align-items:center;gap:8px;
+                font-family:'Space Mono',monospace;font-size:12px;letter-spacing:1px;
+                color:var(--green);text-decoration:none;padding:8px 16px;
+                border:1px solid var(--green);border-radius:8px;
+                transition:all .2s;background:transparent}
+    .guide-link:hover{background:#0f2a1a;transform:translateY(-1px)}
 
     /* INVENTION CARD */
     .invention{background:var(--surf);border:1px solid var(--brd);
@@ -161,7 +178,8 @@
 
 <!-- L'INVENTION -->
 <div class="section">
-  <div class="section-title" data-i18n="inv_title"></div>
+  <div class="section-title" data-i18n="inv_title" onclick="toggleSection(this)"></div>
+  <div class="section-body">
   <div class="invention">
     <h2 data-i18n="inv_h2"></h2>
     <p data-i18n="inv_p1"></p>
@@ -200,11 +218,13 @@
     </div>
     <p style="margin-bottom:0" data-i18n="inv_p3"></p>
   </div>
+  </div><!-- /section-body -->
 </div>
 
 <!-- FONCTIONNALITÉS -->
 <div class="section">
-  <div class="section-title" data-i18n="feat_title"></div>
+  <div class="section-title" data-i18n="feat_title" onclick="toggleSection(this)"></div>
+  <div class="section-body">
   <div class="features">
     <div class="feat"><div class="feat-icon">🔐</div>
       <div class="feat-title" data-i18n="f1_t"></div>
@@ -225,11 +245,20 @@
       <div class="feat-title" data-i18n="f6_t"></div>
       <div class="feat-body" data-i18n="f6_b"></div></div>
   </div>
+  </div><!-- /section-body -->
+</div>
+
+<!-- LIEN GUIDE -->
+<div class="guide-link-wrap">
+  <a id="guide-link" href="guide-utilisation.html" class="guide-link" target="_blank">
+    📖 <span data-i18n="guide_lbl"></span>
+  </a>
 </div>
 
 <!-- CRÉDITS -->
 <div class="section">
-  <div class="section-title" data-i18n="cred_title"></div>
+  <div class="section-title" data-i18n="cred_title" onclick="toggleSection(this)"></div>
+  <div class="section-body">
   <div class="credits">
     <h2 data-i18n="cred_h2"></h2>
     <div class="credit-row">
@@ -285,6 +314,7 @@
     <p style="margin-top:24px;color:var(--muted);font-size:14px;line-height:1.7"
        data-i18n="cred_note"></p>
   </div>
+  </div><!-- /section-body -->
 </div>
 
 <footer>
@@ -333,6 +363,8 @@ const T = {
     cred_phg:    "Ingénieur informatique · Inventeur du système · Idée originale",
     cred_claude: "Assistant IA · Implémentation · Code · Design",
     cred_note:   "Ce projet a été conçu et développé en entier dans une seule session de conversation.\nL'invention du préfixe aléatoire sur les lignes QWERTY est originale et appartient à Pierre-Henri Giraud.",
+    guide_lbl:   "Guide d'utilisation",
+    guide_url:   "guide-utilisation.html",
     lbl_share_app: "Partager l'application",
     btn_copy_link: "⎘ Lien",
     copied:        "Copié !",
@@ -364,6 +396,8 @@ const T = {
     cred_phg:    "Ingeniero informático · Inventor del sistema · Idea original",
     cred_claude: "Asistente IA · Implementación · Código · Diseño",
     cred_note:   "Este proyecto fue concebido y desarrollado en una sola sesión de conversación.\nLa invención del prefijo aleatorio sobre las líneas QWERTY es original y pertenece a Pierre-Henri Giraud.",
+    guide_lbl:   "Guía de uso",
+    guide_url:   "guide-utilisation-es.html",
     lbl_share_app: "Compartir la aplicación",
     btn_copy_link: "⎘ Enlace",
     copied:        "¡Copiado!",
@@ -395,6 +429,8 @@ const T = {
     cred_phg:    "Computer engineer · System inventor · Original idea",
     cred_claude: "AI assistant · Implementation · Code · Design",
     cred_note:   "This project was conceived and developed entirely in a single conversation session.\nThe random prefix invention on QWERTY rows is original and belongs to Pierre-Henri Giraud.",
+    guide_lbl:   "User guide",
+    guide_url:   "guide-utilisation-en.html",
     lbl_share_app: "Share the application",
     btn_copy_link: "⎘ Link",
     copied:        "Copied!",
@@ -426,6 +462,8 @@ const T = {
     cred_phg:    "Инженер-программист · Изобретатель системы · Оригинальная идея",
     cred_claude: "ИИ-ассистент · Реализация · Код · Дизайн",
     cred_note:   "Этот проект был задуман и разработан целиком в ходе одной беседы.\nИзобретение случайного префикса на строках QWERTY оригинально и принадлежит Пьеру-Анри Жиро.",
+    guide_lbl:   "Руководство пользователя",
+    guide_url:   "guide-utilisation.html",
     lbl_share_app: "Поделиться приложением",
     btn_copy_link: "⎘ Ссылка",
     copied:        "Скопировано!",
@@ -504,6 +542,10 @@ function setLang(lang) {
     if (t[key] !== undefined) el.innerHTML = t[key].replace(/\n/g, '<br>');
   });
 
+  /* Mettre à jour le lien guide */
+  const gl = document.getElementById('guide-link');
+  if (gl && t.guide_url) gl.href = t.guide_url;
+
   /* Mettre à jour le select */
   const sel = document.getElementById('lang-select');
   if (sel) sel.value = lang;
@@ -513,6 +555,14 @@ function setLang(lang) {
 
   /* Sauvegarder le choix */
   localStorage.setItem('qw_lang', lang);
+}
+
+/* Accordion */
+function toggleSection(titleEl) {
+  const body = titleEl.nextElementSibling;
+  const isCollapsed = body.classList.contains('collapsed');
+  titleEl.classList.toggle('collapsed', !isCollapsed);
+  body.classList.toggle('collapsed', !isCollapsed);
 }
 
 /* Détecter la langue au démarrage */
