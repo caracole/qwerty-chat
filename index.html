@@ -159,7 +159,12 @@
     <span class="b">QWERTY</span> <span class="g">CIPHER</span>
   </div>
   <p class="hero-sub" data-i18n="hero_sub"></p>
-  <a href="cifrador_qwerty.html" class="btn-hero" data-i18n="hero_btn"></a>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center">
+    <a href="cifrador_qwerty.html" class="btn-hero" data-i18n="hero_btn"></a>
+    <a id="guide-link-hero" href="guide-utilisation.html" class="guide-link" target="_blank">
+      📖 <span data-i18n="guide_lbl"></span>
+    </a>
+  </div>
 
   <!-- Partager le lien de l'application -->
   <div style="margin-top:20px">
@@ -331,6 +336,7 @@
     </a>
   </div>
   <div>QWERTY Cipher · 2026 · Pierre-Henri Giraud × Claude</div>
+  <div style="margin-top:10px;font-size:11px;color:var(--muted);opacity:.6;letter-spacing:2px">v2026.1</div>
 </footer>
 
 <script>
@@ -544,7 +550,9 @@ function setLang(lang) {
 
   /* Mettre à jour le lien guide */
   const gl = document.getElementById('guide-link');
+  const glh = document.getElementById('guide-link-hero');
   if (gl && t.guide_url) gl.href = t.guide_url;
+  if (glh && t.guide_url) glh.href = t.guide_url;
 
   /* Mettre à jour le select */
   const sel = document.getElementById('lang-select');

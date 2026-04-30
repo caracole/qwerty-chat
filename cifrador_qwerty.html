@@ -487,6 +487,7 @@
 <!-- SELECTOR DE IDIOMA + BOUTON À PROPOS -->
 <div class="lang-select-wrap">
   <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
+  <a id="guide-link-app" href="guide-utilisation.html" class="btn-about" target="_blank" data-i18n="btn_guide">📖 Guide</a>
   <button class="btn-icon-toggle" id="btn-icon-mode" onclick="toggleIconMode()" title="Basculer icônes / texte">Aa</button>
   <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
     <option value="fr">🇫🇷 Français</option>
@@ -1503,6 +1504,8 @@ const TI = {
     key_wrong:     "✗ clé incorrecte",
     key_applied:   "✓ clé appliquée",
     btn_about:     "ℹ À propos",
+    btn_guide:     "📖 Guide",
+    guide_url:     "guide-utilisation.html",
     btn_gen_key:   "⚡ Générer clé",
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Effacer clé",
@@ -1558,6 +1561,8 @@ const TI = {
     key_wrong:     "✗ clave incorrecta",
     key_applied:   "✓ clave aplicada",
     btn_about:     "ℹ Acerca de",
+    btn_guide:     "📖 Guía",
+    guide_url:     "guide-utilisation-es.html",
     btn_gen_key:   "⚡ Generar clave",
     btn_contacts:  "📒 Contactos",
     btn_clear_key: "✕ Borrar clave",
@@ -1613,6 +1618,8 @@ const TI = {
     key_wrong:     "✗ wrong key",
     key_applied:   "✓ key applied",
     btn_about:     "ℹ About",
+    btn_guide:     "📖 Guide",
+    guide_url:     "guide-utilisation-en.html",
     btn_gen_key:   "⚡ Generate key",
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Clear key",
@@ -1668,6 +1675,8 @@ const TI = {
     key_wrong:     "✗ ключ неверный",
     key_applied:   "✓ ключ применён",
     btn_about:     "ℹ О проекте",
+    btn_guide:     "📖 Руководство",
+    guide_url:     "guide-utilisation.html",
     btn_gen_key:   "⚡ Создать ключ",
     btn_contacts:  "📒 Контакты",
     btn_clear_key: "✕ Очистить ключ",
@@ -1719,6 +1728,10 @@ function setLang(lang) {
   const decKey = document.getElementById('dec-secret-key');
   const encKey = document.getElementById('enc-secret-key');
   if (encIn)  encIn.placeholder  = t.enc_placeholder;
+
+  /* Mettre à jour le lien guide */
+  const gl = document.getElementById('guide-link-app');
+  if (gl && t.guide_url) gl.href = t.guide_url;
   if (decIn)  decIn.placeholder  = t.dec_placeholder;
   if (decKey) decKey.placeholder = t.dec_key_placeholder;
   if (encKey) encKey.placeholder = t.enc_placeholder;
