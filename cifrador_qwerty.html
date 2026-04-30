@@ -487,19 +487,19 @@
 <!-- SELECTOR DE IDIOMA + BOUTON À PROPOS -->
 <div class="lang-select-wrap">
   <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
-  <div class="theme-picker">
-    <div class="theme-dot t-obsidian active" onclick="setTheme('obsidian')" title="Obsidian"></div>
-    <div class="theme-dot t-ocean"    onclick="setTheme('ocean')"    title="Ocean"></div>
-    <div class="theme-dot t-forest"   onclick="setTheme('forest')"   title="Forest"></div>
-    <div class="theme-dot t-crimson"  onclick="setTheme('crimson')"  title="Crimson"></div>
-    <div class="theme-dot t-paper"    onclick="setTheme('paper')"    title="Paper"></div>
-  </div>
   <button class="btn-icon-toggle" id="btn-icon-mode" onclick="toggleIconMode()" title="Basculer icônes / texte">Aa</button>
   <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
     <option value="fr">🇫🇷 Français</option>
     <option value="es">🇪🇸 Español</option>
     <option value="en">🇬🇧 English</option>
     <option value="ru">🇷🇺 Русский</option>
+  </select>
+  <select class="lang-select" id="theme-select" onchange="setTheme(this.value)">
+    <option value="obsidian">🌑 Obsidian</option>
+    <option value="ocean">🌊 Ocean</option>
+    <option value="forest">🌲 Forest</option>
+    <option value="crimson">🔴 Crimson</option>
+    <option value="paper">☀️ Paper</option>
   </select>
 </div>
 
@@ -1887,12 +1887,8 @@ function setTheme(name) {
   const html = document.documentElement;
   THEMES.forEach(t => html.classList.remove('theme-' + t));
   if (name !== 'obsidian') html.classList.add('theme-' + name);
-  document.querySelectorAll('.theme-dot').forEach(d => {
-    d.classList.toggle('active', d.classList.contains('t-' + name));
-  });
-  /* Adapter le sélecteur de langue (fond change avec le thème) */
-  const sel = document.getElementById('lang-select');
-  if (sel) sel.style.background = getComputedStyle(html).getPropertyValue('--surface2').trim();
+  const sel = document.getElementById('theme-select');
+  if (sel) sel.value = name;
   localStorage.setItem('qw_theme', name);
 }
 
