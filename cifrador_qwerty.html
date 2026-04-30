@@ -347,7 +347,12 @@
        · .accent-row    = separador visual (línea discontinua) antes de la fila 4
     ============================================================ */
     .keyboard-section{max-width:960px;margin:24px auto 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
-    .keyboard-section h2{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .keyboard-section h2{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;transition:color .2s}
+    .keyboard-section h2:hover{color:var(--text)}
+    .keyboard-section h2::after{content:'▾';font-size:14px;transition:transform .3s;display:inline-block}
+    .keyboard-section h2.collapsed::after{transform:rotate(-90deg)}
+    .kb-body{overflow:hidden;transition:max-height .4s ease, opacity .3s ease;max-height:600px;opacity:1}
+    .kb-body.collapsed{max-height:0;opacity:0}
     .kb-row{display:flex;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:2px}
     .kb-label{font-family:var(--mono);font-size:10px;color:var(--text-muted);width:80px;flex-shrink:0}
     .key{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-muted);transition:background .15s,color .15s}
@@ -413,45 +418,43 @@
   </div>
 </div>
 
-<div class="key-bar">
-  <div class="key-bar-title">
-    <span class="key-bar-title-text" data-i18n="key_bar_title"></span>
-    <div style="display:flex;gap:6px">
-      <button class="btn-gen"      onclick="generateKey()"   data-i18n="btn_gen_key">⚡ Générer clé</button>
-      <button class="btn-contacts" onclick="openContacts()"  data-i18n="btn_contacts">📒 Contacts</button>
-    </div>
-  </div>
-  <div class="key-bar-inner">
-    <div class="key-input-wrap">
-      <input type="password" id="enc-secret-key"
-             placeholder="Clave para cifrar…"
-             oninput="onEncKeyChange()" />
-      <button class="eye-btn" onclick="toggleEye('enc-secret-key')">👁</button>
-    </div>
-    <div class="key-hint" id="enc-key-hint">sin clave</div>
-  </div>
-  <div class="key-strength" id="key-strength" style="display:none">
-    <div class="strength-bar" id="sb1"></div>
-    <div class="strength-bar" id="sb2"></div>
-    <div class="strength-bar" id="sb3"></div>
-    <div class="strength-bar" id="sb4"></div>
-    <span class="strength-label" id="strength-label"></span>
-  </div>
-</div>
-
 <!-- ================================================================
      LAYOUT PRINCIPAL: CODIFICADOR (izq.) + DECODIFICADOR (der.)
 ================================================================ -->
 <div class="layout">
 
-  <!-- ============================================================
-       TARJETA CODIFICADOR
-       Flujo: texto → cifrado QWERTY (capa 1) → XOR hex (capa 2 si hay clave)
-  ============================================================ -->
   <div class="card encode">
-    <div class="card-title" data-i18n="enc_title_prefix">⬡ Codificador
-      <!-- Tag que indica si la clave XOR está activa -->
+    <!-- Titre CHIFFREUR en haut du cadre -->
+    <div class="card-title" data-i18n="enc_title_prefix">⬡ Chiffreur
       <span class="mode-tag off" id="enc-mode-tag">sin clave</span>
+    </div>
+
+    <!-- Bloc clé intégré (comme le déchiffreur) -->
+    <div class="inline-key-wrap" style="border-left-color:var(--accent-blue)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <div class="inline-key-label" style="color:var(--accent-blue)" data-i18n="lbl_secret_key"></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-gen" onclick="generateKey()" data-i18n="btn_gen_key">⚡ Générer clé</button>
+          <button class="btn-contacts" onclick="openContacts()" data-i18n="btn_contacts">📒 Contacts</button>
+          <button class="btn-gen" style="border-color:#e06cff;color:#e06cff" onclick="clearEncKey()" data-i18n="btn_clear_key">✕ Effacer clé</button>
+        </div>
+      </div>
+      <div class="inline-key-row">
+        <div class="inline-key-input-wrap">
+          <input type="password" id="enc-secret-key"
+                 placeholder="Clé pour chiffrer…"
+                 oninput="onEncKeyChange()" />
+          <button class="eye-btn-sm" onclick="toggleEye('enc-secret-key')">👁</button>
+        </div>
+        <div class="key-hint" id="enc-key-hint">sin clave</div>
+      </div>
+      <div class="key-strength" id="key-strength" style="display:none">
+        <div class="strength-bar" id="sb1"></div>
+        <div class="strength-bar" id="sb2"></div>
+        <div class="strength-bar" id="sb3"></div>
+        <div class="strength-bar" id="sb4"></div>
+        <span class="strength-label" id="strength-label"></span>
+      </div>
     </div>
 
     <div>
@@ -573,7 +576,8 @@
      Resalta en tiempo real las teclas usadas en la última operación.
 ================================================================ -->
 <div class="keyboard-section">
-  <h2 data-i18n="kb_title"></h2>
+  <h2 data-i18n="kb_title" onclick="toggleKb(this)"></h2>
+  <div class="kb-body collapsed">
   <div id="kb-row0" class="kb-row"></div><!-- Línea 0: cifras 1-0 -->
   <div id="kb-row1" class="kb-row"></div><!-- Línea 1: Q W E R T Y U I O P -->
   <div id="kb-row2" class="kb-row"></div><!-- Línea 2: A S D F G H J K L Ñ -->
@@ -585,6 +589,7 @@
     <span><span class="dot" style="background:#2a2a10;border:1px solid #f5a623"></span> <span data-i18n="leg_both"></span></span>
     <span><span class="dot" style="background:#2a1a35;border:1px solid #e06cff"></span> <span data-i18n="leg_acc"></span></span>
   </div>
+  </div><!-- /kb-body -->
 </div>
 
 <!-- ================================================================
@@ -1368,6 +1373,7 @@ const TI = {
     btn_about:     "ℹ À propos",
     btn_gen_key:   "⚡ Générer clé",
     btn_contacts:  "📒 Contacts",
+    btn_clear_key: "✕ Effacer clé",
     contacts_title:"📒 Carnet de contacts",
     contacts_add:  "Ajouter un contact",
     contacts_save: "✓ Sauvegarder",
@@ -1419,6 +1425,7 @@ const TI = {
     btn_about:     "ℹ Acerca de",
     btn_gen_key:   "⚡ Generar clave",
     btn_contacts:  "📒 Contactos",
+    btn_clear_key: "✕ Borrar clave",
     contacts_title:"📒 Agenda de contactos",
     contacts_add:  "Añadir contacto",
     contacts_save: "✓ Guardar",
@@ -1470,6 +1477,7 @@ const TI = {
     btn_about:     "ℹ About",
     btn_gen_key:   "⚡ Generate key",
     btn_contacts:  "📒 Contacts",
+    btn_clear_key: "✕ Clear key",
     contacts_title:"📒 Contact book",
     contacts_add:  "Add a contact",
     contacts_save: "✓ Save",
@@ -1521,6 +1529,7 @@ const TI = {
     btn_about:     "ℹ О проекте",
     btn_gen_key:   "⚡ Создать ключ",
     btn_contacts:  "📒 Контакты",
+    btn_clear_key: "✕ Очистить ключ",
     contacts_title:"📒 Книга контактов",
     contacts_add:  "Добавить контакт",
     contacts_save: "✓ Сохранить",
@@ -1647,6 +1656,21 @@ window.addEventListener('load', () => {
     }
   };
 });
+
+/* Effacer la clé du chiffreur */
+function clearEncKey() {
+  const inp = document.getElementById('enc-secret-key');
+  inp.value = '';
+  onEncKeyChange();
+}
+
+/* Clavier accordion */
+function toggleKb(h2El) {
+  const body = h2El.nextElementSibling;
+  const isCollapsed = body.classList.contains('collapsed');
+  h2El.classList.toggle('collapsed', !isCollapsed);
+  body.classList.toggle('collapsed', !isCollapsed);
+}
 </script>
 </body>
 </html>
