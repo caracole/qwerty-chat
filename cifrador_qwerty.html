@@ -316,6 +316,10 @@
     button:hover{background:var(--border)}
     .btn-primary-blue{background:var(--accent-blue);border-color:var(--accent-blue);color:#000}
     .btn-primary-blue:hover{background:#74b8ff;border-color:#74b8ff}
+    .btn-paste{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:6px;
+               border:1px solid var(--accent-green);color:var(--accent-green);
+               background:none;cursor:pointer;white-space:nowrap;transition:all .15s}
+    .btn-paste:hover{background:var(--accent-green);color:#000}
 
     /* Tag de modo (sin clave / con clave) junto al título de la tarjeta */
     .mode-tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
@@ -516,13 +520,14 @@
     </div>
 
     <div>
-      <label for="dec-input" data-i18n="lbl_cipher"></label>
-      <!-- oninput: sin clave → decode tiempo real; con clave → pide pulsar botón -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label for="dec-input" style="margin:0" data-i18n="lbl_cipher"></label>
+        <button class="btn-paste" onclick="pasteInto('dec-input')" data-i18n="btn_paste">📋 Coller</button>
+      </div>
       <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
     </div>
 
-    <!-- Bloque de clave propio del decodificador
-         Independiente del codificador — el receptor introduce SU clave aquí -->
+    <!-- Bloque de clave propio del decodificador -->
     <div class="inline-key-wrap">
       <div class="inline-key-label" data-i18n="lbl_secret_key"></div>
       <div class="inline-key-row">
@@ -531,13 +536,11 @@
                  placeholder="Introduce la clave para descifrar…"
                  oninput="onDecKeyChange()"
                  onkeydown="if(event.key==='Enter') decode()" />
-          <!-- Enter también dispara decode() como alternativa al botón -->
           <button class="eye-btn-sm" onclick="toggleEye('dec-secret-key')">👁</button>
         </div>
-        <!-- Estado: "↵ pulsa Descifrar" / "✓ clave correcta" / "✗ incorrecta" -->
+        <button class="btn-paste" onclick="pasteInto('dec-secret-key')" data-i18n="btn_paste">📋 Coller</button>
         <div class="key-status waiting" id="dec-key-status">sin clave</div>
       </div>
-      <!-- Botón explícito: único punto de disparo del descifrado con clave -->
       <button class="btn-decode" onclick="decode()" data-i18n="btn_decode"></button>
     </div>
 
@@ -1375,6 +1378,7 @@ const TI = {
     btn_gen_key:   "⚡ Générer clé",
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Effacer clé",
+    btn_paste:     "📋 Coller",
     contacts_title:"📒 Carnet de contacts",
     contacts_add:  "Ajouter un contact",
     contacts_save: "✓ Sauvegarder",
@@ -1427,6 +1431,7 @@ const TI = {
     btn_gen_key:   "⚡ Generar clave",
     btn_contacts:  "📒 Contactos",
     btn_clear_key: "✕ Borrar clave",
+    btn_paste:     "📋 Pegar",
     contacts_title:"📒 Agenda de contactos",
     contacts_add:  "Añadir contacto",
     contacts_save: "✓ Guardar",
@@ -1479,6 +1484,7 @@ const TI = {
     btn_gen_key:   "⚡ Generate key",
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Clear key",
+    btn_paste:     "📋 Paste",
     contacts_title:"📒 Contact book",
     contacts_add:  "Add a contact",
     contacts_save: "✓ Save",
@@ -1531,6 +1537,7 @@ const TI = {
     btn_gen_key:   "⚡ Создать ключ",
     btn_contacts:  "📒 Контакты",
     btn_clear_key: "✕ Очистить ключ",
+    btn_paste:     "📋 Вставить",
     contacts_title:"📒 Книга контактов",
     contacts_add:  "Добавить контакт",
     contacts_save: "✓ Сохранить",
@@ -1657,6 +1664,18 @@ window.addEventListener('load', () => {
     }
   };
 });
+
+/* Coller depuis le presse-papiers */
+async function pasteInto(id) {
+  try {
+    const text = await navigator.clipboard.readText();
+    const el = document.getElementById(id);
+    el.value = text;
+    el.dispatchEvent(new Event('input'));
+  } catch(e) {
+    alert('Autorisez l\'accès au presse-papiers pour utiliser ce bouton.');
+  }
+}
 
 /* Effacer la clé du chiffreur */
 function clearEncKey() {
