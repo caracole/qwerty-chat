@@ -118,7 +118,8 @@
     /* ============================================================
        SELECTOR DE IDIOMA — lista desplegable con banderas
     ============================================================ */
-    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100;display:flex;gap:8px;align-items:center}
+    .lang-select-wrap{position:fixed;top:12px;right:14px;z-index:100;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+    .lang-select-row{display:flex;gap:8px;align-items:center}
     /* Bouton À propos */
     .btn-about{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:8px;
                border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);
@@ -486,22 +487,26 @@
 
 <!-- SELECTOR DE IDIOMA + BOUTON À PROPOS -->
 <div class="lang-select-wrap">
-  <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
-  <a id="guide-link-app" href="guide-utilisation.html" class="btn-about" target="_blank" data-i18n="btn_guide">📖 Guide</a>
-  <button class="btn-icon-toggle" id="btn-icon-mode" onclick="toggleIconMode()" title="Basculer icônes / texte">Aa</button>
-  <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
-    <option value="fr">🇫🇷 Français</option>
-    <option value="es">🇪🇸 Español</option>
-    <option value="en">🇬🇧 English</option>
-    <option value="ru">🇷🇺 Русский</option>
-  </select>
-  <select class="lang-select" id="theme-select" onchange="setTheme(this.value)">
-    <option value="obsidian">🌑 Obsidian</option>
-    <option value="ocean">🌊 Ocean</option>
-    <option value="forest">🌲 Forest</option>
-    <option value="crimson">🔴 Crimson</option>
-    <option value="paper">☀️ Paper</option>
-  </select>
+  <div class="lang-select-row">
+    <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
+    <a id="guide-link-app" href="guide-utilisation.html" class="btn-about" target="_blank" data-i18n="btn_guide">📖 Guide</a>
+    <button class="btn-icon-toggle" id="btn-icon-mode" onclick="toggleIconMode()" title="Basculer icônes / texte">Aa</button>
+  </div>
+  <div class="lang-select-row">
+    <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
+      <option value="fr">🇫🇷 Français</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="ru">🇷🇺 Русский</option>
+    </select>
+    <select class="lang-select" id="theme-select" onchange="setTheme(this.value)">
+      <option value="obsidian">🌑 Obsidian</option>
+      <option value="ocean">🌊 Ocean</option>
+      <option value="forest">🌲 Forest</option>
+      <option value="crimson">🔴 Crimson</option>
+      <option value="paper">☀️ Paper</option>
+    </select>
+  </div>
 </div>
 
 <!-- ================================================================
