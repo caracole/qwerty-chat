@@ -455,7 +455,10 @@
   <div class="contacts-add">
     <div class="contacts-add-title" data-i18n="contacts_add">Ajouter un contact</div>
     <input type="text" id="new-contact-name" data-i18n-placeholder="contact_name_placeholder" placeholder="Nom du contact…" maxlength="32"/>
-    <input type="text" id="new-contact-key"  data-i18n-placeholder="contact_key_placeholder"  placeholder="Clé secrète partagée…" maxlength="64"/>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input type="text" id="new-contact-key" data-i18n-placeholder="contact_key_placeholder" placeholder="Clé secrète partagée…" maxlength="64" style="flex:1"/>
+      <button class="btn-paste" style="border-color:var(--accent-amber);color:var(--accent-amber);white-space:nowrap" onclick="pasteContactKey()" data-i18n="btn_paste_key">📋 Coller la clé</button>
+    </div>
     <button class="btn-add-contact" onclick="addContact()" data-i18n="contacts_save">✓ Sauvegarder</button>
   </div>
 </div>
@@ -1428,6 +1431,7 @@ const TI = {
     btn_clear_key: "✕ Effacer clé",
     btn_paste:     "📋 Coller",
     btn_copy_key:  "⎘ Copier la clé",
+    btn_paste_key: "📋 Coller la clé",
     contacts_title:"📒 Carnet de contacts",
     contacts_add:  "Ajouter un contact",
     contacts_save: "✓ Sauvegarder",
@@ -1482,6 +1486,7 @@ const TI = {
     btn_clear_key: "✕ Borrar clave",
     btn_paste:     "📋 Pegar",
     btn_copy_key:  "⎘ Copiar clave",
+    btn_paste_key: "📋 Pegar la clave",
     contacts_title:"📒 Agenda de contactos",
     contacts_add:  "Añadir contacto",
     contacts_save: "✓ Guardar",
@@ -1536,6 +1541,7 @@ const TI = {
     btn_clear_key: "✕ Clear key",
     btn_paste:     "📋 Paste",
     btn_copy_key:  "⎘ Copy key",
+    btn_paste_key: "📋 Paste key",
     contacts_title:"📒 Contact book",
     contacts_add:  "Add a contact",
     contacts_save: "✓ Save",
@@ -1590,6 +1596,7 @@ const TI = {
     btn_clear_key: "✕ Очистить ключ",
     btn_paste:     "📋 Вставить",
     btn_copy_key:  "⎘ Копировать ключ",
+    btn_paste_key: "📋 Вставить ключ",
     contacts_title:"📒 Книга контактов",
     contacts_add:  "Добавить контакт",
     contacts_save: "✓ Сохранить",
@@ -1731,6 +1738,21 @@ window.addEventListener('load', () => {
     }
   };
 });
+
+/* Coller la clé dans le champ contact */
+async function pasteContactKey() {
+  const el = document.getElementById('new-contact-key');
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    try {
+      const text = await navigator.clipboard.readText();
+      el.value = text;
+      return;
+    } catch(e) {}
+  }
+  el.value = '';
+  el.focus();
+  document.execCommand('paste');
+}
 
 /* Coller depuis le presse-papiers (efface d'abord le contenu) */
 async function pasteInto(id) {
