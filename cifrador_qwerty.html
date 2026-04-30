@@ -554,15 +554,7 @@
       <span class="mode-tag off" id="dec-mode-tag">sin clave</span>
     </div>
 
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <label for="dec-input" style="margin:0" data-i18n="lbl_cipher"></label>
-        <button class="btn-paste" data-icon="📋" data-tip="" onclick="pasteInto('dec-input')" data-i18n="btn_paste"><span class="btn-label"></span></button>
-      </div>
-      <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
-    </div>
-
-    <!-- Bloque de clave propio del decodificador -->
+    <!-- Bloque de clave propio del decodificador — en haut comme le chiffreur -->
     <div class="inline-key-wrap">
       <div class="inline-key-label" data-i18n="lbl_secret_key"></div>
       <div class="inline-key-row">
@@ -577,6 +569,14 @@
         <div class="key-status waiting" id="dec-key-status">sin clave</div>
       </div>
       <button class="btn-decode" data-icon="⬡" data-tip="" onclick="decode()" data-i18n="btn_decode"><span class="btn-label"></span></button>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label for="dec-input" style="margin:0" data-i18n="lbl_cipher"></label>
+        <button class="btn-paste" data-icon="📋" data-tip="" onclick="pasteInto('dec-input')" data-i18n="btn_paste"><span class="btn-label"></span></button>
+      </div>
+      <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
     </div>
 
     <!-- Resultado descifrado -->
