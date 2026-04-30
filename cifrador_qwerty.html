@@ -435,6 +435,7 @@
   <div class="badge-row">
     <span class="badge badge-pink">✦ vocales acentuadas europeas</span>
     <span class="badge badge-amber">🔑 clave secreta XOR</span>
+    <span class="badge" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:10px;letter-spacing:2px">v2026.1</span>
   </div>
 </header>
 
@@ -531,14 +532,11 @@
       </div>
     </div>
 
-    <!-- Muestra el código QWERTY de capa 1 antes de aplicar XOR
-         Solo visible cuando hay clave activa -->
-    <div class="xor-info" id="enc-xor-info"><span data-i18n="xor_layer1"></span> <span id="enc-qwerty-preview"></span></div>
-
     <!-- Fichas de detalle: un chip por cada letra codificada -->
     <div>
       <div class="pairs-label collapsed" data-i18n="lbl_pairs" onclick="togglePairs(this)"></div>
       <div class="pairs-body">
+        <div class="xor-info" id="enc-xor-info" style="margin-bottom:8px"><span data-i18n="xor_layer1"></span> <span id="enc-qwerty-preview"></span></div>
         <div class="pairs" id="enc-pairs"></div>
       </div>
     </div>
@@ -599,13 +597,10 @@
       </div>
     </div>
 
-    <!-- Muestra el código QWERTY intermedio tras revertir el XOR
-         Solo visible cuando la clave es correcta -->
-    <div class="xor-info" id="dec-xor-info"><span data-i18n="xor_inverse"></span> <span id="dec-qwerty-preview"></span></div>
-
     <div>
       <div class="pairs-label collapsed" data-i18n="lbl_pairs" onclick="togglePairs(this)"></div>
       <div class="pairs-body">
+        <div class="xor-info" id="dec-xor-info" style="margin-bottom:8px"><span data-i18n="xor_inverse"></span> <span id="dec-qwerty-preview"></span></div>
         <div class="pairs" id="dec-pairs"></div>
       </div>
     </div>
@@ -1068,6 +1063,13 @@
              '<span class="dest">' + p.original + (p.isLower ? '·' : '') + '</span></span>';
     }).join('');
 
+    /* Ouvrir l'accordéon des paires si contenu */
+    if (pares.length) {
+      const lbl = document.querySelector('.card.encode .pairs-label');
+      const body = lbl && lbl.nextElementSibling;
+      if (lbl && body) { lbl.classList.remove('collapsed'); body.classList.add('open'); }
+    }
+
     renderKeyboard(hlights);
   }
 
@@ -1209,6 +1211,13 @@
              '<span class="pos">' + p.pos + '</span><span class="arr">→</span>' +
              '<span class="dest">' + p.dest + '</span></span>';
     }).join('');
+
+    /* Ouvrir l'accordéon des paires si contenu */
+    if (pares.length) {
+      const lbl = document.querySelector('.card.decode .pairs-label');
+      const body = lbl && lbl.nextElementSibling;
+      if (lbl && body) { lbl.classList.remove('collapsed'); body.classList.add('open'); }
+    }
 
     renderKeyboard(hlights);
   }
