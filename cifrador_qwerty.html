@@ -381,10 +381,35 @@
     .kb-legend span{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
     .dot{width:10px;height:10px;border-radius:2px;display:inline-block}
 
-    /* Caja de info XOR: muestra el código QWERTY intermedio antes/después del XOR */
+    /* Caja de info XOR */
     .xor-info{font-size:11px;font-family:var(--mono);color:var(--text-muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:none}
     .xor-info.visible{display:block}
     .xor-info span{color:var(--accent-amber)}
+
+    /* ============================================================
+       MODE ICÔNES
+       En mode icône, les boutons [data-icon] n'affichent que l'icône.
+       Le texte original est caché. Un tooltip CSS au survol restitue le label.
+    ============================================================ */
+    .btn-icon-toggle{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:6px;
+                     border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);
+                     cursor:pointer;transition:all .15s;white-space:nowrap}
+    .btn-icon-toggle:hover{border-color:var(--accent-amber);color:var(--accent-amber)}
+    .btn-icon-toggle.active{border-color:var(--accent-amber);color:var(--accent-amber);background:#1a1500}
+
+    /* Tooltip générique */
+    [data-icon]{position:relative}
+    body.icon-mode [data-icon] .btn-label{display:none}
+    body.icon-mode [data-icon]::before{content:attr(data-icon);font-size:15px}
+    body.icon-mode [data-icon]::after{
+      content:attr(data-tip);
+      position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+      background:#1a1a22;border:1px solid var(--border);color:var(--text-main);
+      font-size:11px;font-family:var(--mono);white-space:nowrap;
+      padding:4px 8px;border-radius:6px;pointer-events:none;
+      opacity:0;transition:opacity .15s;z-index:50;
+    }
+    body.icon-mode [data-icon]:hover::after{opacity:1}
   </style>
 </head>
 <body>
@@ -392,6 +417,7 @@
 <!-- SELECTOR DE IDIOMA + BOUTON À PROPOS -->
 <div class="lang-select-wrap">
   <a href="index.html" class="btn-about" data-i18n="btn_about">ℹ À propos</a>
+  <button class="btn-icon-toggle" id="btn-icon-mode" onclick="toggleIconMode()" title="Basculer icônes / texte">Aa</button>
   <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
     <option value="fr">🇫🇷 Français</option>
     <option value="es">🇪🇸 Español</option>
@@ -448,10 +474,10 @@
     <div class="inline-key-wrap" style="border-color:var(--accent-blue);background:var(--surface)">
       <div class="inline-key-label" style="color:var(--accent-blue);background:var(--surface)" data-i18n="lbl_secret_key"></div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-        <button class="btn-gen" onclick="generateKey()" data-i18n="btn_gen_key">⚡ Générer clé</button>
-        <button class="btn-contacts" onclick="openContacts()" data-i18n="btn_contacts">📒 Contacts</button>
-        <button class="btn-paste" id="btn-copy-key" onclick="copyEncKey()" data-i18n="btn_copy_key">⎘ Copier la clé</button>
-        <button class="btn-gen" style="border-color:#e06cff;color:#e06cff" onclick="clearEncKey()" data-i18n="btn_clear_key">✕ Effacer clé</button>
+        <button class="btn-gen" data-icon="⚡" data-tip="" onclick="generateKey()" data-i18n="btn_gen_key"><span class="btn-label"></span></button>
+        <button class="btn-contacts" data-icon="📒" data-tip="" onclick="openContacts()" data-i18n="btn_contacts"><span class="btn-label"></span></button>
+        <button class="btn-paste" id="btn-copy-key" data-icon="⎘" data-tip="" onclick="copyEncKey()" data-i18n="btn_copy_key"><span class="btn-label"></span></button>
+        <button class="btn-gen" style="border-color:#e06cff;color:#e06cff" data-icon="✕" data-tip="" onclick="clearEncKey()" data-i18n="btn_clear_key"><span class="btn-label"></span></button>
       </div>
       <div class="inline-key-row">
         <div class="inline-key-input-wrap">
@@ -480,8 +506,8 @@
     <div class="btn-row">
       <!-- "Recodificar": genera nuevas letras de referencia aleatorias
            para el mismo texto (el código cambia pero sigue siendo válido) -->
-      <button class="btn-primary-blue" onclick="encode()"data-i18n="btn_recode">↺</button>
-      <button onclick="clearEncode()" data-i18n="btn_clear"></button>
+      <button class="btn-primary-blue" data-icon="↺" data-tip="" onclick="encode()" data-i18n="btn_recode"><span class="btn-label"></span></button>
+      <button data-icon="🗑" data-tip="" onclick="clearEncode()" data-i18n="btn_clear"><span class="btn-label"></span></button>
     </div>
 
     <!-- Salida con botón Copiar -->
@@ -497,11 +523,11 @@
     <div>
       <div class="share-label" data-i18n="lbl_share"></div>
       <div class="share-bar">
-        <button class="share-btn wa" onclick="shareCode('wa','enc')" title="WhatsApp">📗 WhatsApp</button>
-        <button class="share-btn tg" onclick="shareCode('tg','enc')" title="Telegram">✈️ Telegram</button>
-        <button class="share-btn sg" onclick="shareCode('sg','enc')" title="Signal">🔵 Signal</button>
-        <button class="share-btn ml" onclick="shareCode('ml','enc')" title="Email">📧 Email</button>
-        <button class="share-btn cp" id="share-cp-enc" onclick="shareCode('cp','enc')" data-i18n="btn_copy_share">⎘ Copier</button>
+        <button class="share-btn wa" data-icon="📗" data-tip="WhatsApp" onclick="shareCode('wa','enc')"><span class="btn-label">WhatsApp</span></button>
+        <button class="share-btn tg" data-icon="✈️" data-tip="Telegram" onclick="shareCode('tg','enc')"><span class="btn-label">Telegram</span></button>
+        <button class="share-btn sg" data-icon="🔵" data-tip="Signal" onclick="shareCode('sg','enc')"><span class="btn-label">Signal</span></button>
+        <button class="share-btn ml" data-icon="📧" data-tip="Email" onclick="shareCode('ml','enc')"><span class="btn-label">Email</span></button>
+        <button class="share-btn cp" id="share-cp-enc" data-icon="⎘" data-tip="" onclick="shareCode('cp','enc')" data-i18n="btn_copy_share"><span class="btn-label"></span></button>
       </div>
     </div>
 
@@ -533,7 +559,7 @@
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <label for="dec-input" style="margin:0" data-i18n="lbl_cipher"></label>
-        <button class="btn-paste" onclick="pasteInto('dec-input')" data-i18n="btn_paste">📋 Coller</button>
+        <button class="btn-paste" data-icon="📋" data-tip="" onclick="pasteInto('dec-input')" data-i18n="btn_paste"><span class="btn-label"></span></button>
       </div>
       <textarea id="dec-input" placeholder="Pega aquí el código a descifrar…" oninput="onDecodeInput()"></textarea>
     </div>
@@ -549,10 +575,10 @@
                  onkeydown="if(event.key==='Enter') decode()" />
           <button class="eye-btn-sm" onclick="toggleEye('dec-secret-key')">👁</button>
         </div>
-        <button class="btn-paste" onclick="pasteInto('dec-secret-key')" data-i18n="btn_paste">📋 Coller</button>
+        <button class="btn-paste" data-icon="📋" data-tip="" onclick="pasteInto('dec-secret-key')" data-i18n="btn_paste"><span class="btn-label"></span></button>
         <div class="key-status waiting" id="dec-key-status">sin clave</div>
       </div>
-      <button class="btn-decode" onclick="decode()" data-i18n="btn_decode"></button>
+      <button class="btn-decode" data-icon="⬡" data-tip="" onclick="decode()" data-i18n="btn_decode"><span class="btn-label"></span></button>
     </div>
 
     <!-- Resultado descifrado -->
@@ -565,11 +591,11 @@
     <div>
       <div class="share-label" data-i18n="lbl_share"></div>
       <div class="share-bar">
-        <button class="share-btn wa" onclick="shareCode('wa','dec')" title="WhatsApp">📗 WhatsApp</button>
-        <button class="share-btn tg" onclick="shareCode('tg','dec')" title="Telegram">✈️ Telegram</button>
-        <button class="share-btn sg" onclick="shareCode('sg','dec')" title="Signal">🔵 Signal</button>
-        <button class="share-btn ml" onclick="shareCode('ml','dec')" title="Email">📧 Email</button>
-        <button class="share-btn cp" id="share-cp-dec" onclick="shareCode('cp','dec')" data-i18n="btn_copy_share">⎘ Copier</button>
+        <button class="share-btn wa" data-icon="📗" data-tip="WhatsApp" onclick="shareCode('wa','dec')"><span class="btn-label">WhatsApp</span></button>
+        <button class="share-btn tg" data-icon="✈️" data-tip="Telegram" onclick="shareCode('tg','dec')"><span class="btn-label">Telegram</span></button>
+        <button class="share-btn sg" data-icon="🔵" data-tip="Signal" onclick="shareCode('sg','dec')"><span class="btn-label">Signal</span></button>
+        <button class="share-btn ml" data-icon="📧" data-tip="Email" onclick="shareCode('ml','dec')"><span class="btn-label">Email</span></button>
+        <button class="share-btn cp" id="share-cp-dec" data-icon="⎘" data-tip="" onclick="shareCode('cp','dec')" data-i18n="btn_copy_share"><span class="btn-label"></span></button>
       </div>
     </div>
 
@@ -1583,7 +1609,15 @@ function setLang(lang) {
   /* Mettre à jour les éléments data-i18n */
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
-    if (t[key] !== undefined) el.textContent = t[key];
+    if (t[key] === undefined) return;
+    /* Si le bouton a un .btn-label, mettre à jour le span + data-tip */
+    const lbl = el.querySelector('.btn-label');
+    if (lbl) {
+      lbl.textContent = t[key];
+      el.setAttribute('data-tip', t[key]);
+    } else {
+      el.textContent = t[key];
+    }
   });
 
   /* Mettre à jour les placeholders */
@@ -1632,6 +1666,13 @@ window.addEventListener('load', () => {
   const browser  = (navigator.language || 'es').slice(0,2).toLowerCase();
   const detected = saved || (['fr','es','en'].includes(browser) ? browser : 'es');
   setLang(detected);
+
+  /* Restaurer le mode icônes */
+  if (localStorage.getItem('qw_icon_mode') === '1') {
+    document.body.classList.add('icon-mode');
+    const btn = document.getElementById('btn-icon-mode');
+    if (btn) { btn.textContent = '⬡'; btn.classList.add('active'); }
+  }
 
   /* Patcher onEncKeyChange */
   const origEnc = window.onEncKeyChange;
@@ -1684,15 +1725,29 @@ window.addEventListener('load', () => {
 
 /* Coller depuis le presse-papiers (efface d'abord le contenu) */
 async function pasteInto(id) {
-  try {
-    const text = await navigator.clipboard.readText();
-    const el = document.getElementById(id);
-    el.value = '';
-    el.value = text;
-    el.dispatchEvent(new Event('input'));
-  } catch(e) {
-    alert('Autorisez l\'accès au presse-papiers pour utiliser ce bouton.');
+  const el = document.getElementById(id);
+  /* Méthode 1 : API clipboard moderne */
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    try {
+      const text = await navigator.clipboard.readText();
+      el.value = '';
+      el.value = text;
+      el.dispatchEvent(new Event('input'));
+      return;
+    } catch(e) { /* on essaie la méthode 2 */ }
   }
+  /* Méthode 2 : focus + execCommand paste (fonctionne sur Brave/Firefox) */
+  el.value = '';
+  el.focus();
+  el.select();
+  const ok = document.execCommand('paste');
+  if (!ok) {
+    /* Méthode 3 : demander à l'utilisateur de coller manuellement */
+    el.value = '';
+    el.focus();
+    alert('Appuyez sur Ctrl+V (ou ⌘V) pour coller dans le champ.');
+  }
+  el.dispatchEvent(new Event('input'));
 }
 
 /* Copier la clé du chiffreur */
@@ -1712,6 +1767,15 @@ function clearEncKey() {
   const inp = document.getElementById('enc-secret-key');
   inp.value = '';
   onEncKeyChange();
+}
+
+/* Toggle mode icônes */
+function toggleIconMode() {
+  const isIcon = document.body.classList.toggle('icon-mode');
+  const btn = document.getElementById('btn-icon-mode');
+  btn.textContent = isIcon ? '⬡' : 'Aa';
+  btn.classList.toggle('active', isIcon);
+  localStorage.setItem('qw_icon_mode', isIcon ? '1' : '0');
 }
 
 /* Accordion paires */
