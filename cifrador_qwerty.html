@@ -442,6 +442,7 @@
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
         <button class="btn-gen" onclick="generateKey()" data-i18n="btn_gen_key">⚡ Générer clé</button>
         <button class="btn-contacts" onclick="openContacts()" data-i18n="btn_contacts">📒 Contacts</button>
+        <button class="btn-paste" id="btn-copy-key" onclick="copyEncKey()" data-i18n="btn_copy_key">⎘ Copier la clé</button>
         <button class="btn-gen" style="border-color:#e06cff;color:#e06cff" onclick="clearEncKey()" data-i18n="btn_clear_key">✕ Effacer clé</button>
       </div>
       <div class="inline-key-row">
@@ -1379,6 +1380,7 @@ const TI = {
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Effacer clé",
     btn_paste:     "📋 Coller",
+    btn_copy_key:  "⎘ Copier la clé",
     contacts_title:"📒 Carnet de contacts",
     contacts_add:  "Ajouter un contact",
     contacts_save: "✓ Sauvegarder",
@@ -1432,6 +1434,7 @@ const TI = {
     btn_contacts:  "📒 Contactos",
     btn_clear_key: "✕ Borrar clave",
     btn_paste:     "📋 Pegar",
+    btn_copy_key:  "⎘ Copiar clave",
     contacts_title:"📒 Agenda de contactos",
     contacts_add:  "Añadir contacto",
     contacts_save: "✓ Guardar",
@@ -1485,6 +1488,7 @@ const TI = {
     btn_contacts:  "📒 Contacts",
     btn_clear_key: "✕ Clear key",
     btn_paste:     "📋 Paste",
+    btn_copy_key:  "⎘ Copy key",
     contacts_title:"📒 Contact book",
     contacts_add:  "Add a contact",
     contacts_save: "✓ Save",
@@ -1538,6 +1542,7 @@ const TI = {
     btn_contacts:  "📒 Контакты",
     btn_clear_key: "✕ Очистить ключ",
     btn_paste:     "📋 Вставить",
+    btn_copy_key:  "⎘ Копировать ключ",
     contacts_title:"📒 Книга контактов",
     contacts_add:  "Добавить контакт",
     contacts_save: "✓ Сохранить",
@@ -1665,16 +1670,29 @@ window.addEventListener('load', () => {
   };
 });
 
-/* Coller depuis le presse-papiers */
+/* Coller depuis le presse-papiers (efface d'abord le contenu) */
 async function pasteInto(id) {
   try {
     const text = await navigator.clipboard.readText();
     const el = document.getElementById(id);
+    el.value = '';
     el.value = text;
     el.dispatchEvent(new Event('input'));
   } catch(e) {
     alert('Autorisez l\'accès au presse-papiers pour utiliser ce bouton.');
   }
+}
+
+/* Copier la clé du chiffreur */
+function copyEncKey() {
+  const val = document.getElementById('enc-secret-key').value;
+  if (!val) return;
+  const btn = document.getElementById('btn-copy-key');
+  const t = TI[currentLang] || TI['fr'];
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = '✓ ' + (t.copied || 'Copié !');
+    setTimeout(() => { btn.textContent = t.btn_copy_key || '⎘ Copier la clé'; }, 2000);
+  });
 }
 
 /* Effacer la clé du chiffreur */
