@@ -219,10 +219,13 @@
        Contenedor de cada sección (codificador / decodificador).
        La franja de color en border-top distingue visualmente cada función.
     ============================================================ */
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:16px}
-    .card.encode{border-top:3px solid var(--accent-blue)}
-    .card.decode{border-top:3px solid var(--accent-green)}
-    .card-title{font-family:var(--mono);font-size:13px;letter-spacing:2px;text-transform:uppercase}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px 24px;display:flex;flex-direction:column;gap:16px;position:relative;margin-top:14px}
+    .card.encode{border-color:var(--accent-blue)}
+    .card.decode{border-color:var(--accent-green)}
+    .card-title{font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;
+                position:absolute;top:-11px;left:16px;
+                background:var(--surface);padding:0 8px;
+                display:flex;align-items:center;gap:8px;white-space:nowrap}
     .card.encode .card-title{color:var(--accent-blue)}
     .card.decode .card-title{color:var(--accent-green)}
 
