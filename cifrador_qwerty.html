@@ -335,6 +335,14 @@
        · .accented   = variante rosa para la línea 4 (acentuadas)
     ============================================================ */
     .pairs{display:flex;flex-wrap:wrap;gap:5px;min-height:28px}
+    .pairs-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);
+                 cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;
+                 transition:color .2s;margin-bottom:6px}
+    .pairs-label:hover{color:var(--text-main)}
+    .pairs-label::after{content:'▾';font-size:13px;transition:transform .3s;display:inline-block}
+    .pairs-label.collapsed::after{transform:rotate(-90deg)}
+    .pairs-body{overflow:hidden;transition:max-height .4s ease, opacity .3s ease;max-height:0;opacity:0}
+    .pairs-body.open{max-height:600px;opacity:1}
     .pair-chip{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)}
     .pair-chip .ref{color:var(--accent-blue)}
     .pair-chip .pos{color:var(--accent-amber)}
@@ -503,8 +511,10 @@
 
     <!-- Fichas de detalle: un chip por cada letra codificada -->
     <div>
-      <label data-i18n="lbl_pairs"></label>
-      <div class="pairs" id="enc-pairs"></div>
+      <div class="pairs-label collapsed" data-i18n="lbl_pairs" onclick="togglePairs(this)"></div>
+      <div class="pairs-body">
+        <div class="pairs" id="enc-pairs"></div>
+      </div>
     </div>
   </div>
 
@@ -568,8 +578,10 @@
     <div class="xor-info" id="dec-xor-info"><span data-i18n="xor_inverse"></span> <span id="dec-qwerty-preview"></span></div>
 
     <div>
-      <label data-i18n="lbl_pairs"></label>
-      <div class="pairs" id="dec-pairs"></div>
+      <div class="pairs-label collapsed" data-i18n="lbl_pairs" onclick="togglePairs(this)"></div>
+      <div class="pairs-body">
+        <div class="pairs" id="dec-pairs"></div>
+      </div>
     </div>
   </div>
 
@@ -1700,6 +1712,14 @@ function clearEncKey() {
   const inp = document.getElementById('enc-secret-key');
   inp.value = '';
   onEncKeyChange();
+}
+
+/* Accordion paires */
+function togglePairs(labelEl) {
+  const body = labelEl.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  labelEl.classList.toggle('collapsed', isOpen);
+  body.classList.toggle('open', !isOpen);
 }
 
 /* Clavier accordion */
