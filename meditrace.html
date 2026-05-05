@@ -2538,17 +2538,19 @@ function exportPDF(mode) {
 
     timelineHtml + bacterioHtml + sourcesHtml + chartsHtml +
 
-    /* Share bar — use GitHub Pages URL, not local file path */
-    var shareUrl = 'https://caracole.github.io/seguimiento-medico/meditrace.html';
-    var shareType = isDetailed ? 'Detallado' : 'Sintético';
-    var shareSubject = 'MediTrace — Informe ' + shareType + ' — ' + patLabel;
-    var shareBody = 'Informe de seguimiento médico (' + shareType + ') generado por MediTrace para ' + patLabel + '.\\n\\nVer aplicación: ' + shareUrl;
+        /* Share bar — save PDF + email */
+    var shareType = isDetailed ? 'Detallado' : 'Sint\u00e9tico';
+    var shareSubject = 'MediTrace \u2014 Informe ' + shareType + ' \u2014 ' + patLabel;
 
     const shareBarHtml =
-    '<div style="text-align:center;margin:16px 0;padding:10px;background:#f8f8f8;border-radius:6px" class="share-bar"><strong>Compartir este informe:</strong> ' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#0088cc" href="https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareSubject) + '" target="_blank">Telegram</a>' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#25D366" href="https://wa.me/?text=' + encodeURIComponent(shareSubject + '\n\n' + shareUrl) + '" target="_blank">WhatsApp</a>' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#1a5276" href="mailto:?subject=' + encodeURIComponent(shareSubject) + '&body=' + encodeURIComponent(shareBody) + '">Email</a></div>' +
+    '<div style="text-align:center;margin:16px 0;padding:14px;background:#f0f5fa;border:1px solid #cce;border-radius:8px" class="share-bar">' +
+    '<div style="font-size:15px;font-weight:700;color:#1a5276;margin-bottom:10px">Compartir este informe</div>' +
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
+    '<button onclick="window.print()" style="display:inline-block;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:600;color:white;background:#1a5276;border:none;cursor:pointer">\ud83d\udcc4 Guardar como PDF</button>' +
+    '<a style="display:inline-block;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;color:white;background:#0088cc" href="mailto:?subject=' + encodeURIComponent(shareSubject) + '&body=' + encodeURIComponent('Estimado/a Doctor/a,\n\nAdjunto el informe de seguimiento m\u00e9dico (' + shareType + ') del paciente ' + patLabel + '.\n\nQuedo a su disposici\u00f3n.\nAtentamente') + '">\u2709\ufe0f Enviar por Email</a>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#888;margin-top:8px">\u2139\ufe0f Guarde primero el PDF, luego adj\u00fantelo al email</div>' +
+    '</div>' +
     '<div class="report-footer"><span>MediTrace v2026.4 \u2014 ' + (isDetailed ? 'INFORME DETALLADO' : 'INFORME SINT\u00c9TICO') + ' \u2014 ' + patLabel + '</span><span>Documento informativo \u2014 No sustituye el criterio m\u00e9dico profesional.</span></div>' +
     '</div>' +
     '<scr' + 'ipt>' +
@@ -4257,6 +4259,39 @@ function buildObservancia() {
 }
 
 /* ================================================================
+   DÉDUPLICATION — Supprime les doublons dans events et bacterio
+================================================================ */
+function deduplicateAll() {
+  /* Events : dédoublonner par date+title */
+  const evts = loadEvents();
+  const seenEvts = new Set();
+  const uniqueEvts = evts.filter(e => {
+    const key = (e.date||'') + '|' + (e.title||'') + '|' + (e.type||'');
+    if (seenEvts.has(key)) return false;
+    seenEvts.add(key);
+    return true;
+  });
+  if (uniqueEvts.length < evts.length) {
+    saveEvents(uniqueEvts);
+    console.log('[MediTrace] Dedup events: ' + evts.length + ' → ' + uniqueEvts.length);
+  }
+
+  /* Bacterio : dédoublonner par date+germe+prelevement */
+  const bacts = loadBacterio();
+  const seenBacts = new Set();
+  const uniqueBacts = bacts.filter(b => {
+    const key = (b.date||b.date_prelevement||'') + '|' + (b.germe||'') + '|' + (b.prelevement||'');
+    if (seenBacts.has(key)) return false;
+    seenBacts.add(key);
+    return true;
+  });
+  if (uniqueBacts.length < bacts.length) {
+    saveBacterio(uniqueBacts);
+    console.log('[MediTrace] Dedup bacterio: ' + bacts.length + ' → ' + uniqueBacts.length);
+  }
+}
+
+/* ================================================================
    INIT
 ================================================================ */
 
@@ -4294,6 +4329,9 @@ window.addEventListener('load', () => {
   /* Charger les paramètres personnalisés dans PARAMS */
   const customs = loadCustomParams();
   Object.entries(customs).forEach(([k,p]) => { PARAMS[k] = p; });
+
+  /* Dédoublonner les données au chargement */
+  deduplicateAll();
 
   const savedLang = localStorage.getItem('mt_lang') || 'es';
   setLang(savedLang);
