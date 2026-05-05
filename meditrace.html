@@ -2538,10 +2538,17 @@ function exportPDF(mode) {
 
     timelineHtml + bacterioHtml + sourcesHtml + chartsHtml +
 
+    /* Share bar — use GitHub Pages URL, not local file path */
+    var shareUrl = 'https://caracole.github.io/seguimiento-medico/meditrace.html';
+    var shareType = isDetailed ? 'Detallado' : 'Sintético';
+    var shareSubject = 'MediTrace — Informe ' + shareType + ' — ' + patLabel;
+    var shareBody = 'Informe de seguimiento médico (' + shareType + ') generado por MediTrace para ' + patLabel + '.\\n\\nVer aplicación: ' + shareUrl;
+
+    const shareBarHtml =
     '<div style="text-align:center;margin:16px 0;padding:10px;background:#f8f8f8;border-radius:6px" class="share-bar"><strong>Compartir este informe:</strong> ' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#0088cc" href="https://t.me/share/url?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent('Informe MediTrace') + '" target="_blank">Telegram</a>' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#25D366" href="https://wa.me/?text=' + encodeURIComponent('Informe MediTrace ' + window.location.href) + '" target="_blank">WhatsApp</a>' +
-    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#1a5276" href="mailto:?subject=' + encodeURIComponent('Informe MediTrace') + '&body=' + encodeURIComponent('Adjunto informe de seguimiento.\n' + window.location.href) + '">Email</a></div>' +
+    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#0088cc" href="https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareSubject) + '" target="_blank">Telegram</a>' +
+    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#25D366" href="https://wa.me/?text=' + encodeURIComponent(shareSubject + '\n\n' + shareUrl) + '" target="_blank">WhatsApp</a>' +
+    '<a style="display:inline-block;margin:0 8px;padding:6px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;color:white;background:#1a5276" href="mailto:?subject=' + encodeURIComponent(shareSubject) + '&body=' + encodeURIComponent(shareBody) + '">Email</a></div>' +
     '<div class="report-footer"><span>MediTrace v2026.4 \u2014 ' + (isDetailed ? 'INFORME DETALLADO' : 'INFORME SINT\u00c9TICO') + ' \u2014 ' + patLabel + '</span><span>Documento informativo \u2014 No sustituye el criterio m\u00e9dico profesional.</span></div>' +
     '</div>' +
     '<scr' + 'ipt>' +
