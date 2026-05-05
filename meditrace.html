@@ -4262,11 +4262,11 @@ function buildObservancia() {
    DÉDUPLICATION — Supprime les doublons dans events et bacterio
 ================================================================ */
 function deduplicateAll() {
-  /* Events : dédoublonner par date+title */
+  /* Events : dédoublonner par date+type (plus large pour attraper les quasi-doublons) */
   const evts = loadEvents();
   const seenEvts = new Set();
   const uniqueEvts = evts.filter(e => {
-    const key = (e.date||'') + '|' + (e.title||'') + '|' + (e.type||'');
+    const key = (e.date||'') + '|' + (e.type||'');
     if (seenEvts.has(key)) return false;
     seenEvts.add(key);
     return true;
@@ -4276,11 +4276,11 @@ function deduplicateAll() {
     console.log('[MediTrace] Dedup events: ' + evts.length + ' → ' + uniqueEvts.length);
   }
 
-  /* Bacterio : dédoublonner par date+germe+prelevement */
+  /* Bacterio : dédoublonner par date seulement (un seul résultat par date) */
   const bacts = loadBacterio();
   const seenBacts = new Set();
   const uniqueBacts = bacts.filter(b => {
-    const key = (b.date||b.date_prelevement||'') + '|' + (b.germe||'') + '|' + (b.prelevement||'');
+    const key = (b.date||b.date_prelevement||'');
     if (seenBacts.has(key)) return false;
     seenBacts.add(key);
     return true;
