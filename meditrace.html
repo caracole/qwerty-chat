@@ -2538,7 +2538,7 @@ function exportPDF(mode) {
 
     timelineHtml + bacterioHtml + sourcesHtml + chartsHtml +
 
-        /* Share bar — save PDF + email */
+            /* Share bar — save PDF + email + copy */
     var shareType = isDetailed ? 'Detallado' : 'Sint\u00e9tico';
     var shareSubject = 'MediTrace \u2014 Informe ' + shareType + ' \u2014 ' + patLabel;
 
@@ -2546,14 +2546,16 @@ function exportPDF(mode) {
     '<div style="text-align:center;margin:16px 0;padding:14px;background:#f0f5fa;border:1px solid #cce;border-radius:8px" class="share-bar">' +
     '<div style="font-size:15px;font-weight:700;color:#1a5276;margin-bottom:10px">Compartir este informe</div>' +
     '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
-    '<button onclick="window.print()" style="display:inline-block;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:600;color:white;background:#1a5276;border:none;cursor:pointer">\ud83d\udcc4 Guardar como PDF</button>' +
-    '<a style="display:inline-block;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;color:white;background:#0088cc" href="mailto:?subject=' + encodeURIComponent(shareSubject) + '&body=' + encodeURIComponent('Estimado/a Doctor/a,\n\nAdjunto el informe de seguimiento m\u00e9dico (' + shareType + ') del paciente ' + patLabel + '.\n\nQuedo a su disposici\u00f3n.\nAtentamente') + '">\u2709\ufe0f Enviar por Email</a>' +
+    '<button onclick="window.print()" style="padding:10px 20px;border-radius:6px;font-size:14px;font-weight:600;color:white;background:#1a5276;border:none;cursor:pointer">Guardar como PDF</button>' +
+    '<button onclick="copiarInforme()" id="btn-copiar" style="padding:10px 20px;border-radius:6px;font-size:14px;font-weight:600;color:white;background:#2ecc71;border:none;cursor:pointer">Copiar informe</button>' +
+    '<a style="display:inline-block;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;color:white;background:#0088cc" href="mailto:?subject=' + encodeURIComponent(shareSubject) + '&body=' + encodeURIComponent('Estimado/a Doctor/a,\n\nAdjunto el informe de seguimiento m\u00e9dico (' + shareType + ') del paciente ' + patLabel + '.\n\nQuedo a su disposici\u00f3n.\nAtentamente') + '">Enviar por Email</a>' +
     '</div>' +
-    '<div style="font-size:12px;color:#888;margin-top:8px">\u2139\ufe0f Guarde primero el PDF, luego adj\u00fantelo al email</div>' +
+    '<div id="copiar-feedback" style="font-size:12px;color:#2ecc71;margin-top:8px;min-height:20px"></div>' +
     '</div>' +
     '<div class="report-footer"><span>MediTrace v2026.4 \u2014 ' + (isDetailed ? 'INFORME DETALLADO' : 'INFORME SINT\u00c9TICO') + ' \u2014 ' + patLabel + '</span><span>Documento informativo \u2014 No sustituye el criterio m\u00e9dico profesional.</span></div>' +
     '</div>' +
     '<scr' + 'ipt>' +
+    'function copiarInforme() {' +'  var c = document.querySelector(".page");' +'  if (c) {' +'    navigator.clipboard.writeText(c.innerText).then(function() {' +'      var btn = document.getElementById("btn-copiar");' +'      btn.textContent = "Copiado!"; btn.style.background = "#27ae60";' +'      var fb = document.getElementById("copiar-feedback");' +'      if (fb) fb.textContent = "Informe copiado al portapapeles";' +'      setTimeout(function() { btn.textContent = "Copiar informe"; btn.style.background = "#2ecc71"; if(fb) fb.textContent=""; }, 3000);' +'    });' +'  }' +'}' +
     'window.addEventListener("load", function() {' +
     '  var tipoInforme = document.title.indexOf("Detallado") >= 0 ? "Informe Detallado" : "Informe Sint\\u00e9tico";' +
     '  var patiente = "' + patLabel.replace(/'/g, "\\'") + '";' +
@@ -4262,11 +4264,11 @@ function buildObservancia() {
    DÉDUPLICATION — Supprime les doublons dans events et bacterio
 ================================================================ */
 function deduplicateAll() {
-  /* Events : dédoublonner par date+type (plus large pour attraper les quasi-doublons) */
+  /* Events : dédoublonner par date seulement (un seul événement par date) */
   const evts = loadEvents();
   const seenEvts = new Set();
   const uniqueEvts = evts.filter(e => {
-    const key = (e.date||'') + '|' + (e.type||'');
+    const key = (e.date||'');
     if (seenEvts.has(key)) return false;
     seenEvts.add(key);
     return true;
